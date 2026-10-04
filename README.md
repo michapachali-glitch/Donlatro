@@ -7,10 +7,12 @@ A [Balatro](https://www.playbalatro.com/) mod by MichaelP: 24 new Jokers, 46 rew
 
 ## Installation
 
-1. Install [Lovely](https://github.com/ethangreen-dev/lovely-injector) (>= 0.9.0) and
-   [Steamodded](https://github.com/Steamodded/smods).
-2. Copy this folder into `%AppData%\Balatro\Mods\` (so you get `Mods\Donlatro\main.lua`).
-3. Start Balatro - Donlatro shows up in the Mods menu.
+Download from the [latest release](https://github.com/michapachali-glitch/Donlatro/releases/latest):
+
+- **`Donlatro-1.0.0-EasyInstall-Windows.zip`** - everything included (Lovely + Steamodded + Donlatro).
+  Copy two things and play; step-by-step instructions (English + Deutsch) are in `INSTALL.txt`.
+- **`Donlatro-1.0.0.zip`** - just the mod, if you already have Lovely (>= 0.9.0) and
+  [Steamodded](https://github.com/Steamodded/smods): put the `Donlatro` folder into `%AppData%\Balatro\Mods\`.
 
 ## Test mode
 
