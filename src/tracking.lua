@@ -1,5 +1,4 @@
 -- Run-wide bookkeeping that has to happen whether or not a particular joker is held.
---   G.GAME.donl_last_hand_type   poker hand of the previous hand (Anyway)
 --   G.GAME.donl_prev_hand        ranks played in the previous hand this round (Classic Donnie)
 --   G.GAME.donl_ante_snapshot    the deck at the start of the current Ante (Die Rückspultaste)
 --   G.GAME.donl_unsicher_until   round after which Die Unsicherheit's debuff ends
@@ -33,7 +32,6 @@ DONLATRO.calculate = function(self, context)
             ranks[c:get_id()] = true
         end
         G.GAME.donl_prev_hand = { round = G.GAME.round, ranks = ranks }
-        G.GAME.donl_last_hand_type = context.scoring_name
     end
     if context.ante_change and context.ante_change > 0 then
         snapshot_deck()

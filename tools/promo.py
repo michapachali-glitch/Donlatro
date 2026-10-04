@@ -2,16 +2,19 @@
 
 Usage: python promo.py <path to m6x11plus.ttf>
 (Balatro's pixel font; extract it from Balatro.exe: resources/fonts/m6x11plus.ttf)
+
+Rendered at S times the base layout from the 2x sprite sheets, so the art stays crisp.
 """
 import os
 import sys
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
-A = os.path.join(ROOT, 'assets', '1x')
+A = os.path.join(ROOT, 'assets', '2x')
 FONT_PATH = sys.argv[1]
 
-W, H = 71, 95
+S = 2                      # output scale; layout numbers below are in 1x units
+W, H = 71 * 2, 95 * 2      # card cell size in the 2x sheets
 BG, PANEL, PANEL_EDGE = (30, 38, 44), (48, 58, 64), (70, 84, 92)
 WHITE, GREY, LIGHT = (255, 255, 255), (150, 156, 170), (214, 220, 228)
 RARITY = {
@@ -31,6 +34,8 @@ def sheet(name):
 
 
 def sprite(name, x, y, soul=None, w=W, h=H):
+    if (w, h) != (W, H):
+        w, h = w * 2, h * 2  # other cell sizes are given in 1x pixels
     im = sheet(name).crop((x * w, y * h, x * w + w, y * h + h))
     if soul:
         im = im.copy()
@@ -39,7 +44,7 @@ def sprite(name, x, y, soul=None, w=W, h=H):
 
 
 def font(size):
-    return ImageFont.truetype(FONT_PATH, size)
+    return ImageFont.truetype(FONT_PATH, size * S)
 
 
 F_TITLE, F_SUB, F_HEAD, F_NAME, F_BODY, F_BADGE = font(150), font(42), font(60), font(30), font(24), font(20)
@@ -74,9 +79,9 @@ NEW_JOKERS = [  # sprite, name, rarity, food?, effect
     (J(6, 1), 'Die Rampe', 'Rare', False, 'X0.25 Mult for each discard used this round.'),
     (J(7, 1), 'Classic Donnie', 'Rare', False, 'Retriggers cards whose rank you played last hand.'),
     (J(8, 1), 'Ihr checkt schon, was ich meine', 'Rare', False, 'Flushes and Straights may be one card short.'),
-    (J(9, 1), 'Anyway', 'Uncommon', False, 'Switch hand type: permanently +4 Mult.'),
+    (J(9, 1), 'DübelDonnie', 'Uncommon', False, 'Every High Card played: permanently +1 Mult.'),
     (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Gains +3 Mult each round. Beat a Boss: +$15, then gone.'),
-    (J(2, 2), 'Buttplugs bei Butlers', 'Uncommon', False, 'Retriggers played cards once per hand already played this round.'),
+    (J(2, 2), 'Buttplugs bei Butlers', 'Uncommon', False, 'Scored cards retrigger once per hand already played this round (3rd hand: they score 3 times).'),
     (J(3, 2), 'Kaffee', 'Common', True, '+1 discard next round. Costs $4 each round.'),
     (J(4, 2, (5, 2)), "Donnie O'Sullivan", 'Legendary', False, 'X6.9 Mult. 1 in 4: loses the thread, debuffed next round.'),
 ]
@@ -170,8 +175,10 @@ CONSUMABLES = [
 
 
 # --- drawing -----------------------------------------------------------------------------
-COLS, TILE_W, TILE_H, GAP, MARGIN = 5, 500, 226, 18, 50
+# layout numbers are written in 1x units and multiplied by S
+COLS, TILE_W, TILE_H, GAP, MARGIN = 5, 500 * S, 226 * S, 18 * S, 50 * S
 PAGE_W = MARGIN * 2 + COLS * TILE_W + (COLS - 1) * GAP
+SHADOW = (12, 14, 18)
 
 
 def wrap(d, text, f, width):
@@ -188,38 +195,62 @@ def wrap(d, text, f, width):
     return lines
 
 
+def shadow_text(d, xy, text, f, fill, off=2):
+    d.text((xy[0] + off * S, xy[1] + off * S), text, font=f, fill=SHADOW)
+    d.text(xy, text, font=f, fill=fill)
+
+
 def badge(d, x, y, text, colour):
     tw = d.textlength(text, font=F_BADGE)
-    d.rounded_rectangle((x, y, x + tw + 14, y + 26), 6, fill=colour)
-    d.text((x + 7, y + 3), text, font=F_BADGE, fill=WHITE)
-    return x + tw + 22
+    d.rounded_rectangle((x, y + 2 * S, x + tw + 14 * S, y + 28 * S), 6 * S, fill=tuple(int(c * 0.55) for c in colour))
+    d.rounded_rectangle((x, y, x + tw + 14 * S, y + 26 * S), 6 * S, fill=colour)
+    d.text((x + 7 * S, y + 3 * S), text, font=F_BADGE, fill=WHITE)
+    return x + tw + 22 * S
+
+
+def drop_shadow(page, box, radius, offset, alpha):
+    x0, y0, x1, y1 = box
+    pad = radius * 3
+    sh = Image.new('RGBA', (x1 - x0 + pad * 2, y1 - y0 + pad * 2), (0, 0, 0, 0))
+    ImageDraw.Draw(sh).rounded_rectangle((pad, pad, pad + x1 - x0, pad + y1 - y0), 14 * S, fill=(0, 0, 0, alpha))
+    sh = sh.filter(ImageFilter.GaussianBlur(radius))
+    page.alpha_composite(sh, (x0 - pad + offset, y0 - pad + offset))
 
 
 def tile(page, x, y, img, scale, name, rarity, badges, effect):
-    d = ImageDraw.Draw(page)
+    accent = RARITY.get(rarity, WHITE)
+    drop_shadow(page, (x, y, x + TILE_W, y + TILE_H), 6 * S, 5 * S, 140)
     panel = Image.new('RGBA', (TILE_W + 1, TILE_H + 1), (0, 0, 0, 0))
-    ImageDraw.Draw(panel).rounded_rectangle((0, 0, TILE_W, TILE_H), 14, fill=PANEL + (225,), outline=PANEL_EDGE + (255,), width=3)
+    pd = ImageDraw.Draw(panel)
+    pd.rounded_rectangle((0, 0, TILE_W, TILE_H), 14 * S, fill=PANEL + (232,), outline=PANEL_EDGE + (255,), width=3 * S)
+    pd.rounded_rectangle((3 * S, 3 * S, TILE_W - 3 * S, 40 * S), 11 * S, fill=(255, 255, 255, 10))  # top sheen
+    pd.rectangle((3 * S, 18 * S, 7 * S, TILE_H - 18 * S), fill=accent + (255,))                   # rarity stripe
     page.alpha_composite(panel, (x, y))
     big = img.resize((img.width * scale, img.height * scale), Image.NEAREST)
-    page.alpha_composite(big, (x + 14 + (142 - big.width) // 2, y + (TILE_H - big.height) // 2))
-    tx, tw = x + 172, TILE_W - 186
-    ty = y + 14
+    sh = Image.new('RGBA', big.size, (0, 0, 0, 0))
+    sh.putalpha(big.getchannel('A').point(lambda a: 120 if a else 0))
+    bx, by = x + 16 * S + (142 * S - big.width) // 2, y + (TILE_H - big.height) // 2
+    page.alpha_composite(sh, (bx + 4 * S, by + 4 * S))
+    page.alpha_composite(big, (bx, by))
+    d = ImageDraw.Draw(page)
+    tx, tw = x + 172 * S, TILE_W - 186 * S
+    ty = y + 14 * S
     for line in wrap(d, name, F_NAME, tw):
-        d.text((tx, ty), line, font=F_NAME, fill=RARITY.get(rarity, WHITE))
-        ty += 32
+        shadow_text(d, (tx, ty), line, F_NAME, accent)
+        ty += 32 * S
     bx = tx
     for text, colour in badges:
-        bx = badge(d, bx, ty + 2, text, colour)
-    ty += 38
+        bx = badge(d, bx, ty + 2 * S, text, colour)
+    ty += 38 * S
     for line in wrap(d, effect, F_BODY, tw):
         d.text((tx, ty), line, font=F_BODY, fill=LIGHT)
-        ty += 26
+        ty += 26 * S
 
 
 def swirl_background(w, h):
-    """Balatro-style swirly backdrop, rendered at 1/8 size and upscaled for chunky pixels."""
+    """Balatro-style swirly backdrop, rendered at 1/(8S) size and upscaled for chunky pixels."""
     import numpy as np
-    sw, sh = w // 8, h // 8
+    sw, sh = w // (8 * S), h // (8 * S)
     yy, xx = np.mgrid[0:sh, 0:sw].astype(float)
     cx, cy = sw * 0.5, sh * 0.12
     r = np.hypot(xx - cx, yy - cy)
@@ -233,28 +264,36 @@ def swirl_background(w, h):
     return img.convert('RGBA')
 
 
+def rotate_crisp(img, angle):
+    """Rotate pixel art without jagged edges: supersample, rotate smoothly, scale back down."""
+    up = img.resize((img.width * 2, img.height * 2), Image.NEAREST)
+    rot = up.rotate(angle, resample=Image.BICUBIC, expand=True)
+    return rot.resize((rot.width // 2, rot.height // 2), Image.LANCZOS)
+
+
 def card_fan(page, cards, cx, top, scale=4, spread=14):
     n = len(cards)
     for i, card in enumerate(cards):
         k = i - (n - 1) / 2
-        big = card.resize((card.width * scale, card.height * scale), Image.NEAREST)
+        big = card.resize((card.width * scale // 2 * S, card.height * scale // 2 * S), Image.NEAREST)
         shadow = Image.new('RGBA', big.size, (0, 0, 0, 0))
         shadow.putalpha(big.getchannel('A').point(lambda a: 110 if a else 0))
-        angle = -k * spread / max(1, (n - 1) / 2) * 1.0
-        rot = big.rotate(angle, resample=Image.NEAREST, expand=True)
-        rsh = shadow.rotate(angle, resample=Image.NEAREST, expand=True)
-        x = int(cx + k * 205 - rot.width / 2)
-        y = int(top + abs(k) ** 1.6 * 14)
-        page.alpha_composite(rsh, (x + 10, y + 12))
+        angle = -k * spread / max(1, (n - 1) / 2)
+        rot = rotate_crisp(big, angle)
+        rsh = shadow.rotate(angle, resample=Image.BICUBIC, expand=True).filter(ImageFilter.GaussianBlur(4 * S))
+        x = int(cx + k * 205 * S - rot.width / 2)
+        y = int(top + abs(k) ** 1.6 * 14 * S)
+        page.alpha_composite(rsh, (x + 10 * S, y + 12 * S))
         page.alpha_composite(rot, (x, y))
 
 
 def section(page, y, title, subtitle, colour):
     d = ImageDraw.Draw(page)
-    d.rectangle((MARGIN, y + 70, PAGE_W - MARGIN, y + 74), fill=colour)
-    d.text((MARGIN, y), title, font=F_HEAD, fill=colour)
-    d.text((MARGIN + d.textlength(title, font=F_HEAD) + 24, y + 26), subtitle, font=F_BODY, fill=GREY)
-    return y + 100
+    d.rectangle((MARGIN + 2 * S, y + 72 * S, PAGE_W - MARGIN + 2 * S, y + 76 * S), fill=SHADOW)
+    d.rectangle((MARGIN, y + 70 * S, PAGE_W - MARGIN, y + 74 * S), fill=colour)
+    shadow_text(d, (MARGIN, y), title, F_HEAD, colour, 3)
+    d.text((MARGIN + d.textlength(title, font=F_HEAD) + 24 * S, y + 26 * S), subtitle, font=F_BODY, fill=GREY)
+    return y + 100 * S
 
 
 def grid(page, y, items, draw_item):
@@ -262,65 +301,64 @@ def grid(page, y, items, draw_item):
         x = MARGIN + (i % COLS) * (TILE_W + GAP)
         draw_item(page, x, y + (i // COLS) * (TILE_H + GAP), item)
     rows = (len(items) + COLS - 1) // COLS
-    return y + rows * (TILE_H + GAP) + 30
+    return y + rows * (TILE_H + GAP) + 30 * S
 
 
 def rows_height(n):
-    return ((n + COLS - 1) // COLS) * (TILE_H + GAP) + 30 + 100
+    return ((n + COLS - 1) // COLS) * (TILE_H + GAP) + 130 * S
 
 
 if __name__ == '__main__':
-    header = 860
+    header = 860 * S
     total = (header + rows_height(len(NEW_JOKERS)) + rows_height(len(REPLACEMENTS)) + rows_height(len(BOSSES))
-             + rows_height(len(VOUCHERS)) + rows_height(len(CONSUMABLES)) + 120)
+             + rows_height(len(VOUCHERS)) + rows_height(len(CONSUMABLES)) + 120 * S)
     page = swirl_background(PAGE_W, total)
     d = ImageDraw.Draw(page)
 
     title = 'DONLATRO'
     tw = d.textlength(title, font=F_TITLE)
     for off, col in ((8, (16, 18, 22)), (0, (254, 95, 85))):
-        d.text(((PAGE_W - tw) / 2 + off, 30 + off), title, font=F_TITLE, fill=col)
+        d.text(((PAGE_W - tw) / 2 + off * S, (30 + off) * S), title, font=F_TITLE, fill=col)
     fan = [J(0, 0), J(3, 0), J(1, 1), J(4, 2, (5, 2)), J(6, 1), J(9, 1), J(1, 0)]
-    card_fan(page, fan, PAGE_W / 2, 215)
+    card_fan(page, fan, PAGE_W / 2, 215 * S)
     d = ImageDraw.Draw(page)
     sub = 'A Balatro mod  -  everything new at a glance'
-    d.text(((PAGE_W - d.textlength(sub, font=F_SUB)) / 2 + 3, 683), sub, font=F_SUB, fill=(16, 18, 22))
-    d.text(((PAGE_W - d.textlength(sub, font=F_SUB)) / 2, 680), sub, font=F_SUB, fill=WHITE)
+    shadow_text(d, ((PAGE_W - d.textlength(sub, font=F_SUB)) / 2, 680 * S), sub, F_SUB, WHITE, 3)
     stats = (f'{len(NEW_JOKERS)} new Jokers  |  {len(REPLACEMENTS)} reworked Jokers  |  {len(BOSSES)} Bosses  |  '
              f'{len(VOUCHERS)} Vouchers  |  2 Tarots  |  3 Spectrals  |  2 Decks')
-    d.text(((PAGE_W - d.textlength(stats, font=F_BODY)) / 2, 740), stats, font=F_BODY, fill=LIGHT)
-    lx = (PAGE_W - 900) / 2                                                  # legend
-    lx = badge(d, lx, 790, 'NEW', NEW_C)
-    d.text((lx, 791), 'brand-new creation', font=F_BODY, fill=LIGHT)
-    lx += 260
-    lx = badge(d, lx, 790, 'REPLACES ...', REPL_C)
-    d.text((lx, 791), 'vanilla Joker, renamed + redrawn', font=F_BODY, fill=LIGHT)
-    lx += 400
-    lx = badge(d, lx, 790, 'FOOD', FOOD_C)
-    d.text((lx, 791), 'runs out', font=F_BODY, fill=LIGHT)
+    shadow_text(d, ((PAGE_W - d.textlength(stats, font=F_BODY)) / 2, 740 * S), stats, F_BODY, LIGHT)
+    lx = (PAGE_W - 900 * S) / 2                                              # legend
+    lx = badge(d, lx, 790 * S, 'NEW', NEW_C)
+    d.text((lx, 791 * S), 'brand-new creation', font=F_BODY, fill=LIGHT)
+    lx += 260 * S
+    lx = badge(d, lx, 790 * S, 'REPLACES ...', REPL_C)
+    d.text((lx, 791 * S), 'vanilla Joker, renamed + redrawn', font=F_BODY, fill=LIGHT)
+    lx += 400 * S
+    lx = badge(d, lx, 790 * S, 'FOOD', FOOD_C)
+    d.text((lx, 791 * S), 'runs out', font=F_BODY, fill=LIGHT)
     y = header
 
     y = section(page, y, 'NEW JOKERS', 'original Donlatro creations', NEW_C)
     y = grid(page, y, NEW_JOKERS, lambda p, x, yy, it: tile(
-        p, x, yy, it[0], 2, it[1], it[2],
+        p, x, yy, it[0], S, it[1], it[2],
         [('NEW', NEW_C), (it[2].upper(), RARITY[it[2]])] + ([('FOOD', FOOD_C)] if it[3] else []), it[4]))
 
     def repl(p, x, yy, it):
         idx, name, vanilla, rarity, effect = it
         img = sprite('Jokers.png', 0, 2) if idx is None else R(idx, idx + 4 if idx >= 41 else None)
-        tile(p, x, yy, img, 2, name, rarity, [('REPLACES ' + vanilla.upper(), REPL_C)], effect)
+        tile(p, x, yy, img, S, name, rarity, [('REPLACES ' + vanilla.upper(), REPL_C)], effect)
 
     y = section(page, y, 'REWORKED JOKERS', 'vanilla effects with a Donlatro name and new art', REPL_C)
     y = grid(page, y, REPLACEMENTS, repl)
 
     y = section(page, y, 'BOSS BLINDS', 'new opponents', RARITY['Boss'])
-    y = grid(page, y, BOSSES, lambda p, x, yy, it: tile(p, x, yy, it[0], 4, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
+    y = grid(page, y, BOSSES, lambda p, x, yy, it: tile(p, x, yy, it[0], 2 * S, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
 
     y = section(page, y, 'VOUCHERS', 'base voucher and its upgrade', RARITY['Voucher'])
-    y = grid(page, y, VOUCHERS, lambda p, x, yy, it: tile(p, x, yy, it[0], 2, it[1], 'Voucher', [('VOUCHER', RARITY['Voucher'])], it[2]))
+    y = grid(page, y, VOUCHERS, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], 'Voucher', [('VOUCHER', RARITY['Voucher'])], it[2]))
 
     y = section(page, y, 'TAROTS, SPECTRALS & DECKS', 'more ways to break the run', RARITY['Spectral'])
-    y = grid(page, y, CONSUMABLES, lambda p, x, yy, it: tile(p, x, yy, it[0], 2, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
+    y = grid(page, y, CONSUMABLES, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
 
     out = os.path.join(ROOT, 'promo')
     os.makedirs(out, exist_ok=True)

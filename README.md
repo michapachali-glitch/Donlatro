@@ -9,9 +9,9 @@ A [Balatro](https://www.playbalatro.com/) mod by MichaelP: 24 new Jokers, 46 rew
 
 Download from the [latest release](https://github.com/michapachali-glitch/Donlatro/releases/latest):
 
-- **`Donlatro-1.0.0-EasyInstall-Windows.zip`** - everything included (Lovely + Steamodded + Donlatro).
+- **`Donlatro-1.1.0-EasyInstall-Windows.zip`** - everything included (Lovely + Steamodded + Donlatro).
   Copy two things and play; step-by-step instructions (English + Deutsch) are in `INSTALL.txt`.
-- **`Donlatro-1.0.0.zip`** - just the mod, if you already have Lovely (>= 0.9.0) and
+- **`Donlatro-1.1.0.zip`** - just the mod, if you already have Lovely (>= 0.9.0) and
   [Steamodded](https://github.com/Steamodded/smods): put the `Donlatro` folder into `%AppData%\Balatro\Mods\`.
 
 ## Test mode

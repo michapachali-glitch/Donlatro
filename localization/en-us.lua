@@ -167,11 +167,10 @@ return {
                 },
             },
             j_donl_anyway = {
-                name = 'Anyway',
+                name = 'DübelDonnie',
                 text = {
-                    'Permanently gains {C:mult}+#1#{} Mult when',
-                    'you play a {C:attention}different hand type{}',
-                    'than your last hand',
+                    'Permanently gains {C:mult}+#1#{} Mult',
+                    'every time a {C:attention}High Card{} is played',
                     '{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)',
                 },
             },
@@ -187,9 +186,11 @@ return {
             j_donl_butlers = {
                 name = 'Buttplugs bei Butlers',
                 text = {
-                    '{C:attention}Retrigger{} played cards once for',
-                    'each hand already played this round',
-                    '{C:inactive}(Currently {C:attention}#1#{C:inactive} retriggers)',
+                    'Every scored card is {C:attention}retriggered{}',
+                    'once for each hand already',
+                    'played this round',
+                    '{C:inactive}(e.g. 3rd hand: every card scores 3 times)',
+                    '{C:inactive}(Next hand: {C:attention}+#1#{C:inactive} retriggers)',
                 },
             },
             j_donl_kaffee = {

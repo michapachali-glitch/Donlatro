@@ -256,7 +256,9 @@ SMODS.Joker {
 
 local ease_dollars_ref = ease_dollars
 function ease_dollars(mod, instant)
-    if mod > 0 and G.jokers and next(SMODS.find_card('j_donl_frustsuppe')) then
+    if type(mod) == 'number' and mod > 0 and G.jokers and next(SMODS.find_card('j_donl_frustsuppe')) then
+        -- tell SMODS nothing was paid, so its "+$X" text and money_altered context say $0
+        if SMODS.ease_dollars_calc then SMODS.dollars_changed = 0 end
         return
     end
     return ease_dollars_ref(mod, instant)

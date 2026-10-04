@@ -55,7 +55,7 @@ SMODS.Blind {
     calculate = function(self, blind, context)
         if blind.disabled then return end
         if context.final_scoring_step then
-            return { xchips = 0.5 }
+            return { xchips = 0.5, message_card = blind.children.animatedSprite }
         end
     end,
 }
@@ -140,8 +140,10 @@ SMODS.Blind {
     end,
     calculate = function(self, blind, context)
         if blind.disabled then return end
+        -- message_card is required: SMODS evaluates discards without a card to attach the
+        -- "-$1" text to, and card_eval_status_text crashes on nil.
         if context.discard then
-            return { dollars = -self.config.extra.dollars }
+            return { dollars = -self.config.extra.dollars, message_card = context.other_card }
         end
     end,
 }
@@ -157,8 +159,13 @@ SMODS.Blind {
     mult = 2,
     calculate = function(self, blind, context)
         if blind.disabled then return end
-        if context.after and G.hand and G.hand.cards[1] then
-            local victim = pseudorandom_element(G.hand.cards, pseudoseed('donl_flusensieb'))
+        if context.after and G.hand then
+            local candidates = {}
+            for _, c in ipairs(G.hand.cards) do
+                if not c.getting_sliced then candidates[#candidates + 1] = c end
+            end
+            if not candidates[1] then return end
+            local victim = pseudorandom_element(candidates, pseudoseed('donl_flusensieb'))
             SMODS.juice_up_blind()
             SMODS.destroy_cards(victim)
         end

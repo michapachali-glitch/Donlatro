@@ -18,6 +18,7 @@ SMODS.Joker {
     set_ability = function(self, card, initial, delay_sprites)
         G.E_MANAGER:add_event(Event({
             func = function()
+                if card.removed then return true end -- e.g. collection closed before the event ran
                 if not (card.edition and card.edition.foil) then
                     card:set_edition('e_foil', true, true)
                 end
@@ -328,7 +329,11 @@ straight_part.func = function(hand)
     return one_short_straight(hand)
 end
 
--- Anyway: playing a different hand type than your last hand permanently gives +4 Mult.
+-- DübelDonnie: permanently gains +1 Mult every time a High Card is played.
+-- Keeps the old 'anyway' key so jokers in existing saves still load. The gain is read from
+-- here (not the card) so copies bought before the rework follow the new balance.
+local DUEBEL_GAIN = 1
+
 SMODS.Joker {
     key = 'anyway',
     atlas = 'Jokers',
@@ -337,18 +342,15 @@ SMODS.Joker {
     cost = 6,
     blueprint_compat = true,
     perishable_compat = false,
-    config = { extra = { mult = 0, gain = 4 } },
+    config = { extra = { mult = 0 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.gain, card.ability.extra.mult } }
+        return { vars = { DUEBEL_GAIN, card.ability.extra.mult } }
     end,
     calculate = function(self, card, context)
         local stg = card.ability.extra
-        if context.before and not context.blueprint then
-            local last = G.GAME.donl_last_hand_type
-            if last and last ~= context.scoring_name then
-                stg.mult = stg.mult + stg.gain
-                return { message = localize('k_upgrade_ex'), colour = G.C.MULT }
-            end
+        if context.before and not context.blueprint and context.scoring_name == 'High Card' then
+            stg.mult = stg.mult + DUEBEL_GAIN
+            return { message = localize('k_upgrade_ex'), colour = G.C.MULT }
         end
         if context.joker_main and stg.mult > 0 then
             return { mult = stg.mult }

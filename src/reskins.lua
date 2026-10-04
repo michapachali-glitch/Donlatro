@@ -36,6 +36,22 @@ for i, key in ipairs(renamed) do
     })
 end
 
+-- Half Joker ("Der kurze Gedanke"): vanilla shrinks any center *named* "Half Joker" to a
+-- half-height card (Card:set_ability, set_sprites, load), which crops the full-size reskin
+-- art and pushes the shop's buy button out of view. A different internal name turns that
+-- off, so the effect is re-implemented here (same numbers as vanilla).
+SMODS.Joker:take_ownership('half', {
+    name = 'Donl Half Joker',
+    loc_vars = function(self, info_queue, card)
+        return { vars = { card.ability.extra.mult, card.ability.extra.size } }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main and #context.full_hand <= card.ability.extra.size then
+            return { mult = card.ability.extra.mult }
+        end
+    end,
+})
+
 -- Space Joker ("Die Rakete") gets the rocket art drawn for Donlatro.
 SMODS.Joker:take_ownership('space', {
     atlas = 'Jokers',

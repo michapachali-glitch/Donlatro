@@ -82,7 +82,9 @@ SMODS.Consumable {
     atlas = 'Consumables',
     pos = { x = 2, y = 0 },
     can_use = function(self, card)
-        return G.GAME.donl_ante_snapshot and not (G.GAME.blind and G.GAME.blind.in_blind)
+        -- an empty snapshot would wipe the deck and softlock the run
+        return G.GAME.donl_ante_snapshot and G.GAME.donl_ante_snapshot[1]
+            and not (G.GAME.blind and G.GAME.blind.in_blind)
     end,
     use = function(self, card, area, copier)
         G.E_MANAGER:add_event(Event({
@@ -93,10 +95,13 @@ SMODS.Consumable {
                     c:remove()
                 end
                 for _, saved in ipairs(G.GAME.donl_ante_snapshot) do
-                    local c = Card(G.deck.T.x, G.deck.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, G.P_CENTERS.c_base)
-                    c:load(copy_table(saved))
-                    G.deck:emplace(c)
-                    table.insert(G.playing_cards, c)
+                    -- skip cards whose enhancement no longer exists (e.g. a mod was removed)
+                    if saved.save_fields and G.P_CENTERS[saved.save_fields.center] then
+                        local c = Card(G.deck.T.x, G.deck.T.y, G.CARD_W, G.CARD_H, G.P_CARDS.empty, G.P_CENTERS.c_base)
+                        c:load(copy_table(saved))
+                        G.deck:emplace(c)
+                        table.insert(G.playing_cards, c)
+                    end
                 end
                 G.deck.config.card_limit = #G.playing_cards
                 play_sound('timpani')
