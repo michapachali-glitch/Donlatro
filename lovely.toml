@@ -1,0 +1,22 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = 0
+
+# Therapieplatz / Kassenzulassung: show the "Reroll Boss" button (normally only with
+# Director's Cut / Retcon) and show its price as $0 when the reroll is free.
+# Regex patches because plain patterns treat [...] as wildcards; the payload avoids a
+# literal dollar sign (special in regex replacements) by using string.char(36).
+[[patches]]
+[patches.regex]
+target = 'functions/UI_definitions.lua'
+pattern = '''\(G\.GAME\.used_vouchers\["v_retcon"\] or G\.GAME\.used_vouchers\["v_directors_cut"\]\) and'''
+position = 'at'
+payload = '''(G.GAME.used_vouchers["v_retcon"] or G.GAME.used_vouchers["v_directors_cut"] or G.GAME.used_vouchers["v_donl_therapieplatz"]) and'''
+
+[[patches]]
+[patches.regex]
+target = 'functions/UI_definitions.lua'
+pattern = '''label = \{localize\('b_reroll_boss'\), localize\('\$'\)\.\.'10'\}'''
+position = 'at'
+payload = '''label = {localize('b_reroll_boss'), localize(string.char(36))..(G.GAME.used_vouchers["v_donl_therapieplatz"] and '0' or '10')}'''

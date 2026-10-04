@@ -1,0 +1,4 @@
+.vscode/
+*.bak
+working/
+__pycache__/

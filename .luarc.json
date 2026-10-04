@@ -1,0 +1,5 @@
+{
+	"runtime.version": "LuaJIT",
+	"workspace.library": ["../Steamodded/lsp_def", "../Steamodded/src"],
+	"diagnostics.globals": ["SMODS", "G", "NFS", "DONLATRO", "localize", "pseudorandom", "pseudoseed", "play_sound", "card_eval_status_text"]
+}
