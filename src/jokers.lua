@@ -397,9 +397,12 @@ SMODS.Joker {
     end,
 }
 
--- Der Akkuschrauber: a recharging battery. Charges +3 Mult and +15 Chips at the end of
+-- Der Akkuschrauber: a recharging battery. Charges +6 Mult and +15 Chips at the end of
 -- every round. Beating a Boss Blind discharges it: earn $1 per 2 stored Mult, then the charge
--- resets to 0 and it keeps going. Never destroyed.
+-- resets to 0 and it keeps going. Never destroyed. Gains are read from here (not the card)
+-- so copies already in a run follow balance changes.
+local AKKU_MULT, AKKU_CHIPS = 6, 15
+
 SMODS.Joker {
     key = 'akkuschrauber',
     atlas = 'Jokers',
@@ -408,20 +411,20 @@ SMODS.Joker {
     cost = 4,
     blueprint_compat = true,
     perishable_compat = false,
-    config = { extra = { mult = 0, chips = 0, gain = 3, chip_gain = 15 } },
+    config = { extra = { mult = 0, chips = 0 } },
     loc_vars = function(self, info_queue, card)
         local stg = card.ability.extra
-        return { vars = { stg.gain or 3, stg.chip_gain or 15, stg.mult or 0, stg.chips or 0 } }
+        return { vars = { AKKU_MULT, AKKU_CHIPS, stg.mult or 0, stg.chips or 0 } }
     end,
     calculate = function(self, card, context)
         local stg = card.ability.extra
-        stg.chips, stg.chip_gain = stg.chips or 0, stg.chip_gain or 15 -- copies from before the rework
+        stg.mult, stg.chips = stg.mult or 0, stg.chips or 0 -- copies from before the rework
         if context.joker_main and (stg.mult > 0 or stg.chips > 0) then
             return { mult = stg.mult > 0 and stg.mult or nil, chips = stg.chips > 0 and stg.chips or nil }
         end
         if context.end_of_round and context.main_eval and not context.blueprint and not context.game_over then
-            stg.mult = stg.mult + stg.gain
-            stg.chips = stg.chips + stg.chip_gain
+            stg.mult = stg.mult + AKKU_MULT
+            stg.chips = stg.chips + AKKU_CHIPS
             if context.beat_boss then
                 local payout = math.floor(stg.mult / 2)
                 stg.mult, stg.chips = 0, 0

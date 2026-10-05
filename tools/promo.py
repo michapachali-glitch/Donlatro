@@ -81,7 +81,7 @@ NEW_JOKERS = [  # sprite, name, rarity, food?, effect
     (J(7, 1), 'Classic Donnie', 'Rare', False, 'Retriggers cards whose rank you played last hand.'),
     (J(8, 1), 'Ihr checkt schon, was ich meine', 'Rare', False, 'Flushes and Straights may be one card short.'),
     (J(9, 1), 'DübelDonnie', 'Uncommon', False, 'High Card: +1 Mult forever. Stoned Cards: 1 in 4 for a Negative Wheel (stacks up to 3 editions).'),
-    (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Charges +3 Mult, +15 Chips per round. Boss: $1 per 2 Mult, recharge.'),
+    (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Charges +6 Mult, +15 Chips per round. Boss: $1 per 2 Mult, recharge.'),
     (J(2, 2), 'Buttplugs bei Butlers', 'Uncommon', False, 'Scored cards retrigger once per hand already played this round (3rd hand: they score 3 times).'),
     (J(3, 2), 'Kaffee', 'Common', True, '+1 discard next round. Costs $4 each round.'),
     (J(4, 2, (5, 2)), "Donnie O'Sullivan", 'Legendary', False, 'X6.9 Mult. 1 in 4: loses the thread, debuffed next round.'),
