@@ -5,34 +5,46 @@ SMODS.Joker {
     rarity = 2,
     cost = 6,
     blueprint_compat = true,
-    config = { extra = { chips = 100 } },
+    config = { extra = { chips = 0, gain = 2 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { card.ability.extra.chips } }
+        info_queue[#info_queue + 1] = G.P_CENTERS.e_foil
+        return { vars = { card.ability.extra.gain, card.ability.extra.chips } }
     end,
     calculate = function(self, card, context)
-        if context.joker_main then
-            return { chips = card.ability.extra.chips }
+        local stg = card.ability.extra
+        -- permanently +2 Chips for every played card that doesn't score
+        if context.before and not context.blueprint then
+            local unscored = 0
+            for _, c in ipairs(context.full_hand) do
+                if not SMODS.in_scoring(c, context.scoring_hand) then unscored = unscored + 1 end
+            end
+            if unscored > 0 then
+                stg.chips = stg.chips + stg.gain * unscored
+                return { message = localize('k_upgrade_ex'), colour = G.C.CHIPS }
+            end
         end
-    end,
-    -- always Foil: applied on creation (also in the collection) ...
-    set_ability = function(self, card, initial, delay_sprites)
-        G.E_MANAGER:add_event(Event({
-            func = function()
-                if card.removed then return true end -- e.g. collection closed before the event ran
-                if not (card.edition and card.edition.foil) then
-                    card:set_edition('e_foil', true, true)
-                end
-                return true
-            end,
-        }))
+        if context.joker_main and stg.chips > 0 then
+            return { chips = stg.chips }
+        end
+        -- Foil only while a Boss Blind is being played
+        if context.setting_blind and not context.blueprint and G.GAME.blind.boss then
+            stg.boss_foil = true
+            card:set_edition('e_foil', true)
+        end
+        if context.end_of_round and context.main_eval and not context.blueprint and stg.boss_foil then
+            stg.boss_foil = nil
+            card:set_edition(nil, true)
+        end
     end,
 }
 
--- ... and any later edition change (shop roll, Aura, Ectoplasm, Wheel of Fortune) is forced back to Foil.
+-- Daunendonnie's edition is locked: Foil during Boss Blinds, none otherwise
+-- (shop rolls, Aura, Ectoplasm, Wheel of Fortune can't give it another edition).
 local set_edition_ref = Card.set_edition
 function Card:set_edition(edition, ...)
     if self.config and self.config.center and self.config.center.key == 'j_donl_daunendonnie' then
-        edition = 'e_foil'
+        local stg = self.ability and self.ability.extra
+        edition = (type(stg) == 'table' and stg.boss_foil) and 'e_foil' or nil
     end
     return set_edition_ref(self, edition, ...)
 end

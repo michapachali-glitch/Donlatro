@@ -9,7 +9,13 @@ return {
         Joker = {
             j_donl_daunendonnie = {
                 name = 'Daunendonnie',
-                text = { '{C:chips}+#1#{} Chips' },
+                text = {
+                    'Permanently gains {C:chips}+#1#{} Chips',
+                    'for each played card',
+                    'that does {C:attention}not{} score',
+                    'Becomes {C:dark_edition}Foil{} during {C:attention}Boss Blinds{}',
+                    '{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)',
+                },
             },
             j_donl_trektrendy = {
                 name = 'TrekTrendy',
@@ -30,6 +36,15 @@ return {
             },
             j_donl_doener = {
                 name = 'Döner',
+                text = {
+                    '{C:mult}+#1#{} Mult for each different',
+                    '{C:attention}suit{} in the scored hand',
+                    '{X:mult,C:white} X#2# {} Mult while {C:attention}So(ß)e{} is held',
+                    '{C:attention}#3#{} bites left, one per hand',
+                },
+            },
+            j_donl_don_appetito = {
+                name = 'Don Appetito',
                 text = {
                     '{C:mult}+#1#{} Mult',
                     'Gains {C:mult}+#2#{} Mult for every',

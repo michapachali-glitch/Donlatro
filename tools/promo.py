@@ -60,10 +60,11 @@ def R(i, soul=None):
 
 
 NEW_JOKERS = [  # sprite, name, rarity, food?, effect
-    (J(0, 0), 'Daunendonnie', 'Uncommon', False, '+100 Chips. Always Foil.'),
+    (J(0, 0), 'Daunendonnie', 'Uncommon', False, 'Gains +2 Chips for every unscored card. Foil during Boss Blinds.'),
     (J(1, 0), 'TrekTrendy', 'Uncommon', False, 'Doubles the sell value of all your cards. Stacks.'),
     (J(2, 0), 'So(ß)e', 'Common', True, '+100 Chips, -5 each round. Spills if another food Joker is held.'),
-    (J(3, 0), 'Döner', 'Uncommon', True, '+10 Mult, +5 for every Donlatro food that ran out. 0 Mult with So(ß)e.'),
+    (J(3, 0), 'Döner', 'Uncommon', True, '+6 Mult per suit in the hand, X1.5 with So(ß)e. 10 bites.'),
+    (J(6, 2), 'Don Appetito', 'Uncommon', True, '+10 Mult, +5 for every Donlatro food that ran out. 0 Mult with So(ß)e.'),
     (J(4, 0), 'HolyEnergy', 'Uncommon', True, 'Gains X0.2 Mult each round. Destroyed when it reaches X2.'),
     (J(5, 0), 'Maggi', 'Uncommon', True, '+5 discards, -1 each round.'),
     (J(6, 0), 'Maultaschen', 'Uncommon', True, '+5 hand size, -1 each round.'),

@@ -2,7 +2,7 @@
 -- alongside vanilla food jokers (Ice Cream, Popcorn, ...).
 --
 -- G.GAME.donl_food_run_out counts Donlatro food jokers that ran out (destroyed by their
--- own effect) this run; Döner scales with it. It is saved with the run.
+-- own effect) this run; Don Appetito scales with it. It is saved with the run.
 
 local function end_of_round(context)
     return context.end_of_round and context.main_eval and not context.blueprint and not context.game_over
@@ -59,14 +59,39 @@ SMODS.Joker {
     end,
 }
 
--- 2) Döner: +10 Mult, +5 more per Donlatro food joker that ran out this run. 0 Mult while So(ß)e is held.
--- The gain is read from the definition (not the card) so Döners already in a run follow balance changes.
-local DOENER_GAIN = 5
+-- 2) Don Appetito (formerly Döner's effect): +10 Mult, +5 more per Donlatro food joker that ran
+-- out this run. 0 Mult while So(ß)e is held. The gain is read from the definition (not the card)
+-- so copies already in a run follow balance changes.
+local APPETITO_GAIN = 5
 
-local function doener_mult(card)
-    return card.ability.extra.mult + DOENER_GAIN * (G.GAME and G.GAME.donl_food_run_out or 0)
+local function appetito_mult(card)
+    return (card.ability.extra.mult or 10) + APPETITO_GAIN * (G.GAME and G.GAME.donl_food_run_out or 0)
 end
 
+SMODS.Joker {
+    key = 'don_appetito',
+    atlas = 'Jokers',
+    pos = { x = 6, y = 2 },
+    rarity = 2,
+    cost = 6,
+    blueprint_compat = true,
+    attributes = { 'food' },
+    config = { extra = { mult = 10 } },
+    loc_vars = function(self, info_queue, card)
+        return { vars = { appetito_mult(card), APPETITO_GAIN } }
+    end,
+    calculate = function(self, card, context)
+        if context.joker_main then
+            if next(SMODS.find_card('j_donl_sosse')) then
+                return { message = localize('k_donl_soggy'), colour = G.C.RED }
+            end
+            return { mult = appetito_mult(card) }
+        end
+    end,
+}
+
+-- 2b) Döner "mit alles": +6 Mult per different suit in the scored hand (every suit is an
+-- ingredient), extra X1.5 Mult while So(ß)e is held ("mit Soße"). 10 bites, one per hand played.
 SMODS.Joker {
     key = 'doener',
     atlas = 'Jokers',
@@ -74,17 +99,39 @@ SMODS.Joker {
     rarity = 2,
     cost = 6,
     blueprint_compat = true,
+    eternal_compat = false,
     attributes = { 'food' },
-    config = { extra = { mult = 10 } },
+    config = { extra = { mult_per_suit = 6, xmult_sauce = 1.5, bites = 10 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { doener_mult(card), DOENER_GAIN } }
+        local stg = card.ability.extra
+        return { vars = { stg.mult_per_suit or 6, stg.xmult_sauce or 1.5, stg.bites or 10 } }
     end,
     calculate = function(self, card, context)
+        local stg = card.ability.extra
+        stg.mult_per_suit, stg.xmult_sauce, stg.bites = stg.mult_per_suit or 6, stg.xmult_sauce or 1.5, stg.bites or 10
         if context.joker_main then
-            if next(SMODS.find_card('j_donl_sosse')) then
-                return { message = localize('k_donl_soggy'), colour = G.C.RED }
+            local suits, n = {}, 0
+            for _, c in ipairs(context.scoring_hand) do
+                for _, s in ipairs({ 'Spades', 'Hearts', 'Clubs', 'Diamonds' }) do
+                    if not suits[s] and c:is_suit(s) then
+                        suits[s] = true
+                        n = n + 1
+                        break -- a Wild card fills one missing ingredient, not all four
+                    end
+                end
             end
-            return { mult = doener_mult(card) }
+            local sauce = next(SMODS.find_card('j_donl_sosse')) and stg.xmult_sauce or nil
+            if n > 0 or sauce then
+                return { mult = n > 0 and n * stg.mult_per_suit or nil, xmult = sauce }
+            end
+        end
+        if context.after and not context.blueprint then
+            if stg.bites - 1 <= 0 then
+                food_run_out(card)
+                return { message = localize('k_eaten_ex'), colour = G.C.RED }
+            end
+            stg.bites = stg.bites - 1
+            return { message = localize { type = 'variable', key = 'a_donl_portions_left', vars = { stg.bites } }, colour = G.C.FILTER }
         end
     end,
 }
@@ -228,7 +275,7 @@ SMODS.Joker {
 }
 
 -- 7) Frustsuppe: +100 Chips, +30 Mult, X2 Mult - but while held, every way of earning money
--- pays $0 (interest, blind rewards, selling, Gold cards, ...). Selling it counts for Döner.
+-- pays $0 (interest, blind rewards, selling, Gold cards, ...). Selling it counts for Don Appetito.
 SMODS.Joker {
     key = 'frustsuppe',
     atlas = 'Jokers',
