@@ -182,3 +182,12 @@ SMODS.Consumable:take_ownership('incantation', {
         return false
     end,
 }, true)
+
+-- Vanilla Spectral "Hex": removed from the game - never spawns and hidden from the collection.
+-- Taken over silently (no Donlatro badge); it stays registered so saves load.
+SMODS.Consumable:take_ownership('hex', {
+    no_collection = true,
+    in_pool = function(self, args)
+        return false
+    end,
+}, true)
