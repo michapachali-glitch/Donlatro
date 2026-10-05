@@ -281,6 +281,14 @@ return {
         },
         Enhanced = {
             m_stone = { name = 'Stoned Card' },
+            m_donl_rampe = {
+                name = 'Rampen-Karte',
+                text = {
+                    'Scores {C:chips}0{} Chips on its',
+                    'first trigger, {C:chips}+#1#{} Chips',
+                    'on every {C:attention}retrigger{}',
+                },
+            },
         },
         Other = {
             p_donl_donnie = {
@@ -439,6 +447,14 @@ return {
             },
         },
         Tarot = {
+            c_donl_rampenfieber = {
+                name = 'Rampenfieber',
+                text = {
+                    'Enhances up to {C:attention}#1#{}',
+                    'selected cards into',
+                    '{C:attention}Rampen-Karten{}',
+                },
+            },
             c_donl_classic_donnie = {
                 name = 'Classic Donnie',
                 text = {
@@ -473,10 +489,12 @@ return {
                     'random {C:attention}Joker{}',
                     'Destroys a random card',
                     'in your deck',
+                    '{C:inactive,s:0.8}A word with no meaning that',
+                    '{C:inactive,s:0.8}changes everything. 11 uses in #231.',
                 },
             },
             c_donl_unsicherheit = {
-                name = 'Die Unsicherheit',
+                name = 'Zocker',
                 text = {
                     '{C:attention}+#1#{} Joker slot',
                     'All current Jokers are',

@@ -138,7 +138,7 @@ SMODS.Voucher {
         for _, j in ipairs(G.jokers.cards) do SMODS.recalc_debuff(j) end
     end,
     calculate = function(self, card, context)
-        -- Blinds can't debuff Jokers (Perishable, Unsicherheit, O'Sullivan still can)
+        -- Blinds can't debuff Jokers (Perishable, Zocker, O'Sullivan still can)
         local c = context.debuff_card
         if c and c.ability and c.ability.set == 'Joker' and not own_debuff(c) then
             return { prevent_debuff = true }

@@ -20,7 +20,7 @@ WHITE, GREY, LIGHT = (255, 255, 255), (150, 156, 170), (214, 220, 228)
 RARITY = {
     'Common': (0, 157, 255), 'Uncommon': (75, 194, 146), 'Rare': (254, 95, 85),
     'Legendary': (178, 108, 187), 'Boss': (230, 70, 70), 'Final Boss': (224, 40, 220),
-    'Voucher': (250, 180, 60), 'Tarot': (200, 160, 100), 'Spectral': (100, 140, 220), 'Deck': (150, 150, 170), 'Booster': (170, 90, 210),
+    'Voucher': (250, 180, 60), 'Tarot': (200, 160, 100), 'Spectral': (100, 140, 220), 'Deck': (150, 150, 170), 'Booster': (170, 90, 210), 'Enhancement': (90, 170, 220),
 }
 NEW_C, REPL_C, FOOD_C = (80, 200, 110), (120, 128, 146), (236, 146, 60)
 
@@ -166,9 +166,11 @@ VOUCHERS = [
 
 CONSUMABLES = [
     (sprite('Consumables.png', 0, 0), 'Classic Donnie', 'Tarot', 'Copies 1 selected card into your deck.'),
+    (sprite('Consumables.png', 5, 0), 'Rampenfieber', 'Tarot', 'Turns up to 2 selected cards into Rampen-Karten.'),
+    (sprite('Enhancements.png', 0, 0), 'Rampen-Karte', 'Enhancement', '0 Chips on its first trigger, +80 Chips on every retrigger.'),
     (sprite('Consumables.png', 2, 0), 'Die Rückspultaste', 'Spectral', 'Restore your deck to the start of this Ante. Lose all money.'),
     (sprite('Consumables.png', 3, 0), 'Eingeschissen', 'Spectral', 'Random Joker becomes Negative; destroys a random card.'),
-    (sprite('Consumables.png', 4, 0), 'Die Unsicherheit', 'Spectral', '+1 Joker slot; your Jokers are debuffed for a round.'),
+    (sprite('Consumables.png', 4, 0), 'Zocker', 'Spectral', '+1 Joker slot; your Jokers are debuffed for a round.'),
     (sprite('Packs.png', 0, 0), 'Donnie Pack', 'Booster', 'Choose 1 of 3 Donlatro Jokers: Uncommon, Rare or Legendary only.'),
     (sprite('Backs.png', 0, 0), 'Das ADHS-Deck', 'Deck', '+2 hand size, +1 discard. Jokers reshuffle every round.'),
     (sprite('Backs.png', 1, 0), 'Das Frustsuppen-Deck', 'Deck', 'Start at $0, no interest, +2 hands per round.'),
@@ -326,7 +328,7 @@ if __name__ == '__main__':
     sub = 'A Balatro mod  -  everything new at a glance'
     shadow_text(d, ((PAGE_W - d.textlength(sub, font=F_SUB)) / 2, 680 * S), sub, F_SUB, WHITE, 3)
     stats = (f'{len(NEW_JOKERS)} new Jokers  |  {len(REPLACEMENTS)} reworked Jokers  |  {len(BOSSES)} Bosses  |  '
-             f'{len(VOUCHERS)} Vouchers  |  1 Tarot  |  3 Spectrals  |  2 Decks  |  1 Pack')
+             f'{len(VOUCHERS)} Vouchers  |  2 Tarots  |  1 Enhancement  |  3 Spectrals  |  2 Decks  |  1 Pack')
     shadow_text(d, ((PAGE_W - d.textlength(stats, font=F_BODY)) / 2, 740 * S), stats, F_BODY, LIGHT)
     lx = (PAGE_W - 900 * S) / 2                                              # legend
     lx = badge(d, lx, 790 * S, 'NEW', NEW_C)
@@ -358,7 +360,7 @@ if __name__ == '__main__':
     y = section(page, y, 'VOUCHERS', 'base voucher and its upgrade', RARITY['Voucher'])
     y = grid(page, y, VOUCHERS, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], 'Voucher', [('VOUCHER', RARITY['Voucher'])], it[2]))
 
-    y = section(page, y, 'TAROTS, SPECTRALS, DECKS & PACKS', 'more ways to break the run', RARITY['Spectral'])
+    y = section(page, y, 'TAROTS, SPECTRALS, ENHANCEMENTS, DECKS & PACKS', 'more ways to break the run', RARITY['Spectral'])
     y = grid(page, y, CONSUMABLES, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
 
     out = os.path.join(ROOT, 'promo')

@@ -151,7 +151,7 @@ SMODS.Consumable {
     end,
 }
 
--- Spectral: Die Unsicherheit - +1 Joker slot, but all current Jokers are debuffed for one
+-- Spectral: Zocker (formerly 'Die Unsicherheit', key kept for old saves) - +1 Joker slot, but all current Jokers are debuffed for one
 -- full round (lifted in src/tracking.lua).
 SMODS.Consumable {
     key = 'unsicherheit',
