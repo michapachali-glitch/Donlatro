@@ -283,9 +283,10 @@ return {
             m_donl_rampe = {
                 name = 'Rampen-Karte',
                 text = {
-                    'Scores {C:chips}0{} Chips on its',
-                    'first trigger, {C:chips}+#1#{} Chips',
-                    'on every {C:attention}retrigger{}',
+                    'Starts at {C:chips}0{} Chips',
+                    'Gains {C:chips}+#1#{} Chips every',
+                    'time it is {C:attention}scored{}',
+                    '{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)',
                 },
             },
         },

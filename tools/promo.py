@@ -166,7 +166,7 @@ VOUCHERS = [
 CONSUMABLES = [
     (sprite('Consumables.png', 0, 0), 'Classic Donnie', 'Tarot', 'Copies 1 selected card into your deck.'),
     (sprite('Consumables.png', 5, 0), 'Rampenfieber', 'Tarot', 'Turns up to 2 selected cards into Rampen-Karten.'),
-    (sprite('Enhancements.png', 0, 0), 'Rampen-Karte', 'Enhancement', '0 Chips on its first trigger, +80 Chips on every retrigger.'),
+    (sprite('Enhancements.png', 0, 0), 'Rampen-Karte', 'Enhancement', 'Starts at 0 Chips, gains +5 Chips every time it is scored.'),
     (sprite('Consumables.png', 2, 0), 'Die Rückspultaste', 'Spectral', 'Restore your deck to the start of this Ante. Lose all money.'),
     (sprite('Consumables.png', 3, 0), 'Eingeschissen', 'Spectral', 'Random Joker becomes Negative; destroys a random card.'),
     (sprite('Consumables.png', 4, 0), 'Zocker', 'Spectral', '+1 Joker slot; your Jokers are debuffed for a round.'),
