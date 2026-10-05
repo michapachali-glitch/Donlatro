@@ -85,6 +85,40 @@ function modulate_sound(dt)
     if not ok then error(err, 0) end
 end
 
+-- The neighbour stomps upstairs: every second beat of the 128 BPM track the screen shakes and
+-- all Jokers jump. Uses vanilla's G.ROOM.jiggle, so the player's Screenshake / Reduced Motion
+-- settings still apply.
+local STOMP_EVERY = 2 * 60 / 128 -- seconds (every 2nd beat)
+local last_stomp
+
+local game_update_ref = Game.update
+function Game:update(dt)
+    game_update_ref(self, dt)
+    if not nachbar_active() or G.SETTINGS.paused then
+        last_stomp = nil
+        return
+    end
+    local n = math.floor(G.TIMERS.REAL / STOMP_EVERY)
+    if last_stomp and n ~= last_stomp then
+        G.ROOM.jiggle = (G.ROOM.jiggle or 0) + 2.5
+        for _, j in ipairs(G.jokers and G.jokers.cards or {}) do
+            j:juice_up(0.35, 0.35)
+        end
+    end
+    last_stomp = n
+end
+
+-- On White Stake (the easiest difficulty) the Nachbar is always the final boss.
+local get_new_boss_ref = get_new_boss
+function get_new_boss()
+    local ante = G.GAME.round_resets.ante
+    if G.GAME.stake == 1 and G.P_BLINDS.bl_donl_nachbar and ante >= 2 and ante % G.GAME.win_ante == 0 then
+        G.GAME.bosses_used.bl_donl_nachbar = (G.GAME.bosses_used.bl_donl_nachbar or 0) + 1
+        return 'bl_donl_nachbar'
+    end
+    return get_new_boss_ref()
+end
+
 -- Die Kammer (boss): the first hand of the blind is drawn face down.
 SMODS.Blind {
     key = 'kammer',

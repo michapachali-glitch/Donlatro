@@ -287,6 +287,7 @@ return {
                 text = {
                     'All Chips are halved',
                     'and the techno is LOUD',
+                    '{C:inactive}(always the final boss on White Stake)',
                 },
             },
             bl_donl_kammer = {
