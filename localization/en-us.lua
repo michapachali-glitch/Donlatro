@@ -40,7 +40,6 @@ return {
                     '{C:mult}+#1#{} Mult for each different',
                     '{C:attention}suit{} in the scored hand',
                     '{X:mult,C:white} X#2# {} Mult while {C:attention}So(ß)e{} is held',
-                    '{C:attention}#3#{} bites left, one per hand',
                 },
             },
             j_donl_don_appetito = {
