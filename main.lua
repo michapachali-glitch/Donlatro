@@ -22,3 +22,8 @@ for _, objects in ipairs({ SMODS.Centers, SMODS.Blinds }) do
         end
     end
 end
+
+-- Dev only: automated self-test, runs if working/selftest.lua exists (never shipped).
+if NFS.getInfo(DONLATRO.path .. 'working/selftest.lua') then
+    assert(SMODS.load_file('working/selftest.lua'))()
+end

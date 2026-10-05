@@ -187,7 +187,8 @@ return {
                     'Permanently gains {C:mult}+#1#{} Mult',
                     'every time a {C:attention}High Card{} is played',
                     'Scored {C:attention}Stoned Cards{} have a {C:green}#3# in #4#{}',
-                    'chance to create a {C:tarot}Wheel of Fortune{}',
+                    'chance to create a {C:dark_edition}Negative{}',
+                    '{C:tarot}Wheel of Fortune{}',
                     '{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)',
                 },
             },
@@ -280,6 +281,23 @@ return {
         },
         Enhanced = {
             m_stone = { name = 'Stoned Card' },
+        },
+        Other = {
+            donl_layers = {
+                name = 'Layered Editions',
+                text = {
+                    'Also has: {C:dark_edition}#1#{}',
+                },
+            },
+            donl_negative_wheel = {
+                name = 'Negative Wheel',
+                text = {
+                    'A {C:dark_edition}Negative{} {C:tarot}Wheel of Fortune{}',
+                    'can add an edition to a Joker',
+                    'that already has one',
+                    '{C:inactive}(up to {C:attention}3{C:inactive} editions per Joker)',
+                },
+            },
         },
         Blind = {
             bl_donl_wasserschaden = {
@@ -477,6 +495,9 @@ return {
         },
     },
     misc = {
+        labels = {
+            donl_layers = 'Layered',
+        },
         dictionary = {
             k_donl_spilled = 'Spilled!',
             k_donl_soggy = 'Soggy!',

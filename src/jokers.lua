@@ -147,7 +147,9 @@ SMODS.Joker {
             for _, j in ipairs(G.jokers.cards) do
                 if j ~= card then
                     for key in pairs(SMODS.Stickers) do
-                        j:remove_sticker(key)
+                        if key ~= 'donl_layers' then -- layered editions aren't a real sticker
+                            j:remove_sticker(key)
+                        end
                     end
                     SMODS.recalc_debuff(j)
                     j:set_cost()
@@ -343,21 +345,18 @@ end
 
 -- DübelDonnie: permanently gains +1 Mult every time a High Card is played.
 -- Also: every scored Stoned Card (vanilla Stone Card, renamed) has a 1 in 4 chance to create
--- a Wheel of Fortune (if there is room for a consumable).
+-- a Negative Wheel of Fortune, which can stack up to 3 editions on one Joker.
 -- Keeps the old 'anyway' key so jokers in existing saves still load. The gain is read from
 -- here (not the card) so copies bought before the rework follow the new balance.
 local DUEBEL_GAIN = 1
 local DUEBEL_WHEEL_ODDS = 4
 
+-- Negative, so it never needs a free consumable slot. A Negative Wheel can stack editions
+-- (see src/layered_editions.lua).
 local function create_wheel_of_fortune()
-    if #G.consumeables.cards + G.GAME.consumeable_buffer >= G.consumeables.config.card_limit then
-        return false
-    end
-    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
     G.E_MANAGER:add_event(Event({
         func = function()
-            SMODS.add_card({ key = 'c_wheel_of_fortune' })
-            G.GAME.consumeable_buffer = 0
+            SMODS.add_card({ key = 'c_wheel_of_fortune', edition = 'e_negative' })
             return true
         end,
     }))
@@ -376,6 +375,7 @@ SMODS.Joker {
     loc_vars = function(self, info_queue, card)
         info_queue[#info_queue + 1] = G.P_CENTERS.m_stone
         info_queue[#info_queue + 1] = G.P_CENTERS.c_wheel_of_fortune
+        info_queue[#info_queue + 1] = { set = 'Other', key = 'donl_negative_wheel' }
         local num, den = SMODS.get_probability_vars(card, 1, DUEBEL_WHEEL_ODDS, 'donl_duebel_wheel')
         return { vars = { DUEBEL_GAIN, card.ability.extra.mult, num, den } }
     end,
