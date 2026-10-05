@@ -1,5 +1,5 @@
-"""Donnie Pack cover: Donnie (from the Daunendonnie photo) with a Joker face - jester hat,
-face paint, red grin - on a booster pack (foil strips taken from the vanilla Buffoon pack).
+"""Donnie Pack cover: Daunendonnie (from the photo, with his sunglasses) wearing a jester
+crown, on a booster pack (foil strips taken from the vanilla Buffoon pack).
 
 Usage: python pack_art.py <m6x11plus.ttf>
 Writes donnie_pack_1x.png and donnie_pack_preview.png into the current directory.
@@ -27,19 +27,9 @@ def donnie_head():
     head = Image.open(PHOTO).convert('RGB').crop((262, 10, 422, 250))
     head = ImageEnhance.Contrast(head).enhance(1.2)
     small = head.resize((30, 44), Image.LANCZOS).quantize(14, dither=Image.NONE).convert('RGBA')
-    # joker face paint: push the skin towards white, keep the sunglasses/beard dark
-    px = small.load()
-    for y in range(small.height):
-        for x in range(small.width):
-            r, g, b, a = px[x, y]
-            if r > 120 and r > b + 15:                      # skin tones
-                px[x, y] = (min(255, r + 60), min(255, g + 70), min(255, b + 80), a)
     mask = Image.new('L', small.size, 0)
     ImageDraw.Draw(mask).ellipse((1, 0, 28, 43), fill=255)
     small.putalpha(mask)
-    d = ImageDraw.Draw(small)
-    d.arc((5, 26, 24, 40), 15, 165, fill=(214, 40, 48), width=2)        # wide joker grin
-    d.ellipse((13, 27, 16, 30), fill=(230, 50, 50))                     # red nose
     return small
 
 
