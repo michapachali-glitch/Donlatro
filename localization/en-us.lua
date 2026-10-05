@@ -283,6 +283,15 @@ return {
             m_stone = { name = 'Stoned Card' },
         },
         Other = {
+            p_donl_donnie = {
+                name = 'Donnie Pack',
+                text = {
+                    'Choose {C:attention}#1#{} of up to',
+                    '{C:attention}#2#{} Donlatro Jokers:',
+                    '{C:green}Uncommon{}, {C:red}Rare{} or {C:legendary,E:1}Legendary{}',
+                    '{C:inactive}(no Commons, no food)',
+                },
+            },
             donl_layers = {
                 name = 'Layered Editions',
                 text = {
@@ -503,6 +512,7 @@ return {
             k_donl_soggy = 'Soggy!',
             k_donl_extinguished = 'Extinguished!',
             k_donl_empty = 'Empty!',
+            k_donl_donnie_pack = 'Donnie Pack',
             k_donl_lost_thread = 'Lost the thread!',
             k_donl_charging = 'Charging!',
             k_donl_battery_empty = 'Akku leer!',
