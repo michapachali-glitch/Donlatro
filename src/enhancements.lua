@@ -7,6 +7,13 @@ SMODS.Atlas {
     py = 95,
 }
 
+-- Stoned Card (vanilla Stone Card, renamed in localization): same effect, new art with a
+-- cannabis leaf and a bit of smoke (tools/stoned_art.py).
+SMODS.Enhancement:take_ownership('stone', {
+    atlas = 'Enhancements',
+    pos = { x = 1, y = 0 },
+})
+
 local RAMPE_CHIPS = 80
 
 SMODS.Enhancement {
