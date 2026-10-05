@@ -173,3 +173,12 @@ SMODS.Consumable {
         G.GAME.donl_unsicher_until = G.GAME.round + 1
     end,
 }
+
+-- Vanilla Spectral "Incantation": removed from the game - never spawns and hidden from the
+-- collection. Taken over silently (no Donlatro badge); it stays registered so saves load.
+SMODS.Consumable:take_ownership('incantation', {
+    no_collection = true,
+    in_pool = function(self, args)
+        return false
+    end,
+}, true)
