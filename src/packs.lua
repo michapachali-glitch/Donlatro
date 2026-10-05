@@ -14,6 +14,7 @@ local function donnie_pool(rarity, taken)
     for key, c in pairs(G.P_CENTERS) do
         if c.set == 'Joker' and c.mod == DONLATRO and not c.taken_ownership and c.rarity == rarity
             and not SMODS.has_attribute(c, 'food') and not G.GAME.banned_keys[key] and not taken[key]
+            and not (type(c.in_pool) == 'function' and not c:in_pool({ source = 'donl_pack' }))
             and not (G.GAME.used_jokers[key] and not SMODS.showman(key)) then
             pool[#pool + 1] = key
         end

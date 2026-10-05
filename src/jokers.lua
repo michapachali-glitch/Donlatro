@@ -297,6 +297,12 @@ SMODS.Joker {
     rarity = 3,
     cost = 8,
     blueprint_compat = false,
+    -- REMOVED: never spawns and hidden from the collection; stays registered (and working)
+    -- so saves that already hold one keep loading.
+    no_collection = true,
+    in_pool = function(self, args)
+        return false
+    end,
 }
 
 local function checkt_held()

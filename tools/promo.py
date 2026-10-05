@@ -79,7 +79,6 @@ NEW_JOKERS = [  # sprite, name, rarity, food?, effect
     (J(5, 1), 'UDK Abschlussarbeit', 'Uncommon', False, 'Only Aces scored: X1 Mult per scored Ace.'),
     (J(6, 1), 'Die Rampe', 'Rare', False, 'X0.25 Mult for each discard used this round.'),
     (J(7, 1), 'Classic Donnie', 'Rare', False, 'Retriggers cards whose rank you played last hand.'),
-    (J(8, 1), 'Ihr checkt schon, was ich meine', 'Rare', False, 'Flushes and Straights may be one card short.'),
     (J(9, 1), 'DübelDonnie', 'Uncommon', False, 'High Card: +1 Mult forever. Stoned Cards: 1 in 4 for a Negative Wheel (stacks up to 3 editions).'),
     (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Charges +6 Mult, +15 Chips per round. Boss: $1 per 2 Mult, recharge.'),
     (J(2, 2), 'Buttplugs bei Butlers', 'Uncommon', False, 'Scored cards retrigger once per hand already played this round (3rd hand: they score 3 times).'),
