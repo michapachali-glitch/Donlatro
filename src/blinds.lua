@@ -62,7 +62,7 @@ SMODS.Blind {
 
 SMODS.Sound {
     key = 'music_nachbar',
-    path = 'music_nachbar.wav',
+    path = 'music_nachbar.ogg',
     select_music_track = function(self)
         return nachbar_active() and 100 or false
     end,

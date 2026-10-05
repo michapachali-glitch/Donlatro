@@ -30,3 +30,10 @@ as often in the shop. Set it to `false` for the normal Joker pool.
 | `src/tracking.lua` | run-wide bookkeeping (hand history, Ante deck snapshot, ...) |
 | `localization/en-us.lua` | all names and descriptions |
 | `tools/` | Python scripts that generate the pixel art, the boss music and the poster |
+
+## Credits
+
+- Final boss music: "Vengeance Electro" by Of Far Different Nature,
+  [CC0 1.0](https://opengameart.org/content/vengeance-electro) (public domain) - see `assets/sounds/CREDITS.md`.
+- Balatro by LocalThunk. Built on [Steamodded](https://github.com/Steamodded/smods) and
+  [Lovely](https://github.com/ethangreen-dev/lovely-injector).
