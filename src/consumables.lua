@@ -35,11 +35,17 @@ SMODS.Consumable {
 }
 
 -- Tarot: Die Therapie - strip debuffs, edition and enhancement from 1 selected card, pay $2.
+-- REMOVED FOR NOW (design to be decided): never spawns and is hidden from the collection.
+-- It stays registered so saves that still hold one keep loading.
 SMODS.Consumable {
     key = 'therapie',
     set = 'Tarot',
     atlas = 'Consumables',
     pos = { x = 1, y = 0 },
+    no_collection = true,
+    in_pool = function(self, args)
+        return false
+    end,
     config = { max_highlighted = 1, extra = { dollars = 2 } },
     loc_vars = function(self, info_queue, card)
         return { vars = { self.config.extra.dollars } }

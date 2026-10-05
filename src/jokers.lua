@@ -342,9 +342,27 @@ straight_part.func = function(hand)
 end
 
 -- DübelDonnie: permanently gains +1 Mult every time a High Card is played.
+-- Also: every scored Stoned Card (vanilla Stone Card, renamed) has a 1 in 4 chance to create
+-- a Wheel of Fortune (if there is room for a consumable).
 -- Keeps the old 'anyway' key so jokers in existing saves still load. The gain is read from
 -- here (not the card) so copies bought before the rework follow the new balance.
 local DUEBEL_GAIN = 1
+local DUEBEL_WHEEL_ODDS = 4
+
+local function create_wheel_of_fortune()
+    if #G.consumeables.cards + G.GAME.consumeable_buffer >= G.consumeables.config.card_limit then
+        return false
+    end
+    G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+    G.E_MANAGER:add_event(Event({
+        func = function()
+            SMODS.add_card({ key = 'c_wheel_of_fortune' })
+            G.GAME.consumeable_buffer = 0
+            return true
+        end,
+    }))
+    return true
+end
 
 SMODS.Joker {
     key = 'anyway',
@@ -356,10 +374,19 @@ SMODS.Joker {
     perishable_compat = false,
     config = { extra = { mult = 0 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { DUEBEL_GAIN, card.ability.extra.mult } }
+        info_queue[#info_queue + 1] = G.P_CENTERS.m_stone
+        info_queue[#info_queue + 1] = G.P_CENTERS.c_wheel_of_fortune
+        local num, den = SMODS.get_probability_vars(card, 1, DUEBEL_WHEEL_ODDS, 'donl_duebel_wheel')
+        return { vars = { DUEBEL_GAIN, card.ability.extra.mult, num, den } }
     end,
     calculate = function(self, card, context)
         local stg = card.ability.extra
+        if context.individual and context.cardarea == G.play and not context.blueprint
+            and SMODS.has_enhancement(context.other_card, 'm_stone')
+            and SMODS.pseudorandom_probability(card, 'donl_duebel_wheel', 1, DUEBEL_WHEEL_ODDS)
+            and create_wheel_of_fortune() then
+            return { message = localize('k_plus_tarot'), colour = G.C.PURPLE, message_card = card }
+        end
         if context.before and not context.blueprint and context.scoring_name == 'High Card' then
             stg.mult = stg.mult + DUEBEL_GAIN
             return { message = localize('k_upgrade_ex'), colour = G.C.MULT }
@@ -370,8 +397,9 @@ SMODS.Joker {
     end,
 }
 
--- Der Akkuschrauber: gains +3 Mult at the end of each round. Beating a Boss Blind
--- pays $15 and uses it up.
+-- Der Akkuschrauber: a recharging battery. Charges +3 Mult and +15 Chips at the end of
+-- every round. Beating a Boss Blind discharges it: earn $1 per 2 stored Mult, then the charge
+-- resets to 0 and it keeps going. Never destroyed.
 SMODS.Joker {
     key = 'akkuschrauber',
     atlas = 'Jokers',
@@ -379,25 +407,27 @@ SMODS.Joker {
     rarity = 1,
     cost = 4,
     blueprint_compat = true,
-    eternal_compat = false,
     perishable_compat = false,
-    config = { extra = { mult = 0, gain = 3, dollars = 15 } },
+    config = { extra = { mult = 0, chips = 0, gain = 3, chip_gain = 15 } },
     loc_vars = function(self, info_queue, card)
         local stg = card.ability.extra
-        return { vars = { stg.gain, stg.dollars, stg.mult } }
+        return { vars = { stg.gain or 3, stg.chip_gain or 15, stg.mult or 0, stg.chips or 0 } }
     end,
     calculate = function(self, card, context)
         local stg = card.ability.extra
-        if context.joker_main and stg.mult > 0 then
-            return { mult = stg.mult }
+        stg.chips, stg.chip_gain = stg.chips or 0, stg.chip_gain or 15 -- copies from before the rework
+        if context.joker_main and (stg.mult > 0 or stg.chips > 0) then
+            return { mult = stg.mult > 0 and stg.mult or nil, chips = stg.chips > 0 and stg.chips or nil }
         end
         if context.end_of_round and context.main_eval and not context.blueprint and not context.game_over then
-            if context.beat_boss then
-                SMODS.destroy_cards(card)
-                return { dollars = stg.dollars }
-            end
             stg.mult = stg.mult + stg.gain
-            return { message = localize('k_upgrade_ex'), colour = G.C.MULT }
+            stg.chips = stg.chips + stg.chip_gain
+            if context.beat_boss then
+                local payout = math.floor(stg.mult / 2)
+                stg.mult, stg.chips = 0, 0
+                return { dollars = payout, message = localize('k_donl_battery_empty'), colour = G.C.MONEY }
+            end
+            return { message = localize('k_donl_charging'), colour = G.C.FILTER }
         end
     end,
 }

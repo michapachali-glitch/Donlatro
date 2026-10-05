@@ -80,8 +80,8 @@ NEW_JOKERS = [  # sprite, name, rarity, food?, effect
     (J(6, 1), 'Die Rampe', 'Rare', False, 'X0.25 Mult for each discard used this round.'),
     (J(7, 1), 'Classic Donnie', 'Rare', False, 'Retriggers cards whose rank you played last hand.'),
     (J(8, 1), 'Ihr checkt schon, was ich meine', 'Rare', False, 'Flushes and Straights may be one card short.'),
-    (J(9, 1), 'DübelDonnie', 'Uncommon', False, 'Every High Card played: permanently +1 Mult.'),
-    (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Gains +3 Mult each round. Beat a Boss: +$15, then gone.'),
+    (J(9, 1), 'DübelDonnie', 'Uncommon', False, 'High Card: permanently +1 Mult. Stoned Cards: 1 in 4 for a Wheel of Fortune.'),
+    (J(1, 2), 'Der Akkuschrauber', 'Common', False, 'Charges +3 Mult, +15 Chips per round. Boss: $1 per 2 Mult, recharge.'),
     (J(2, 2), 'Buttplugs bei Butlers', 'Uncommon', False, 'Scored cards retrigger once per hand already played this round (3rd hand: they score 3 times).'),
     (J(3, 2), 'Kaffee', 'Common', True, '+1 discard next round. Costs $4 each round.'),
     (J(4, 2, (5, 2)), "Donnie O'Sullivan", 'Legendary', False, 'X6.9 Mult. 1 in 4: loses the thread, debuffed next round.'),
@@ -118,7 +118,7 @@ REPLACEMENTS = [  # reskin index, name, vanilla name, rarity, effect
     (27, 'Der Werbepartner', 'Luchador', 'Uncommon', 'Sell to disable the Boss Blind'),
     (28, '"Lass ihn mal drin"', 'Mr. Bones', 'Uncommon', 'Prevents death at 25% chips, then gone'),
     (29, 'Rausgeschnitten', 'Ceremonial Dagger', 'Uncommon', 'Eats the Joker to its right for Mult'),
-    (30, 'Löcher spachteln', 'Marble Joker', 'Uncommon', 'Adds a Stone card each Blind'),
+    (30, 'Löcher spachteln', 'Marble Joker', 'Uncommon', 'Adds a Stoned card each Blind'),
     (31, 'Der Spaziergang', 'Hiker', 'Uncommon', 'Played cards gain +5 Chips forever'),
     (32, 'Das Merch', 'Swashbuckler', 'Common', 'Mult = sell value of your other Jokers'),
     (33, 'Der Zahlendreher', 'Misprint', 'Common', 'Random +0 to +23 Mult'),
@@ -166,7 +166,6 @@ VOUCHERS = [
 
 CONSUMABLES = [
     (sprite('Consumables.png', 0, 0), 'Classic Donnie', 'Tarot', 'Copies 1 selected card into your deck.'),
-    (sprite('Consumables.png', 1, 0), 'Die Therapie', 'Tarot', 'Cleans 1 card (debuff, edition, enhancement). -$2.'),
     (sprite('Consumables.png', 2, 0), 'Die Rückspultaste', 'Spectral', 'Restore your deck to the start of this Ante. Lose all money.'),
     (sprite('Consumables.png', 3, 0), 'Eingeschissen', 'Spectral', 'Random Joker becomes Negative; destroys a random card.'),
     (sprite('Consumables.png', 4, 0), 'Die Unsicherheit', 'Spectral', '+1 Joker slot; your Jokers are debuffed for a round.'),
@@ -326,7 +325,7 @@ if __name__ == '__main__':
     sub = 'A Balatro mod  -  everything new at a glance'
     shadow_text(d, ((PAGE_W - d.textlength(sub, font=F_SUB)) / 2, 680 * S), sub, F_SUB, WHITE, 3)
     stats = (f'{len(NEW_JOKERS)} new Jokers  |  {len(REPLACEMENTS)} reworked Jokers  |  {len(BOSSES)} Bosses  |  '
-             f'{len(VOUCHERS)} Vouchers  |  2 Tarots  |  3 Spectrals  |  2 Decks')
+             f'{len(VOUCHERS)} Vouchers  |  1 Tarot  |  3 Spectrals  |  2 Decks')
     shadow_text(d, ((PAGE_W - d.textlength(stats, font=F_BODY)) / 2, 740 * S), stats, F_BODY, LIGHT)
     lx = (PAGE_W - 900 * S) / 2                                              # legend
     lx = badge(d, lx, 790 * S, 'NEW', NEW_C)

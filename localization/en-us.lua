@@ -186,16 +186,19 @@ return {
                 text = {
                     'Permanently gains {C:mult}+#1#{} Mult',
                     'every time a {C:attention}High Card{} is played',
+                    'Scored {C:attention}Stoned Cards{} have a {C:green}#3# in #4#{}',
+                    'chance to create a {C:tarot}Wheel of Fortune{}',
                     '{C:inactive}(Currently {C:mult}+#2#{C:inactive} Mult)',
                 },
             },
             j_donl_akkuschrauber = {
                 name = 'Der Akkuschrauber',
                 text = {
-                    'Gains {C:mult}+#1#{} Mult at end of round',
-                    'When you defeat a {C:attention}Boss Blind{},',
-                    'earn {C:money}$#2#{} and destroy this Joker',
-                    '{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult)',
+                    'Charges {C:mult}+#1#{} Mult and {C:chips}+#2#{} Chips',
+                    'at end of round',
+                    'Beating a {C:attention}Boss Blind{} empties it:',
+                    'earn {C:money}$1{} per {C:mult}2{} Mult, then recharge',
+                    '{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult, {C:chips}+#4#{C:inactive} Chips)',
                 },
             },
             j_donl_butlers = {
@@ -257,7 +260,8 @@ return {
             j_luchador = { name = 'Der Werbepartner' },
             j_mr_bones = { name = '„Lass ihn mal drin"' },
             j_ceremonial = { name = 'Rausgeschnitten' },
-            j_marble = { name = 'Löcher spachteln' },
+            j_marble = { name = 'Löcher spachteln', text = { 'Adds one {C:attention}Stoned{} card', 'to deck when', '{C:attention}Blind{} is selected' } },
+            j_stone = { text = { 'Gives {C:chips}+#1#{} Chips for', 'each {C:attention}Stoned Card', 'in your {C:attention}full deck', '{C:inactive}(Currently {C:chips}+#2#{C:inactive} Chips)' } },
             j_hiker = { name = 'Der Spaziergang' },
             j_swashbuckler = { name = 'Das Merch' },
             j_misprint = { name = 'Der Zahlendreher' },
@@ -273,6 +277,9 @@ return {
             j_yorick = { name = '„Wo war ich?"' },
             j_chicot = { name = 'Der Spotify-Deal' },
             j_perkeo = { name = 'Das Transkript' },
+        },
+        Enhanced = {
+            m_stone = { name = 'Stoned Card' },
         },
         Blind = {
             bl_donl_wasserschaden = {
@@ -476,6 +483,10 @@ return {
             k_donl_extinguished = 'Extinguished!',
             k_donl_empty = 'Empty!',
             k_donl_lost_thread = 'Lost the thread!',
+            k_donl_charging = 'Charging!',
+            k_donl_battery_empty = 'Akku leer!',
+            k_plus_stone = '+1 Stoned',
+            ph_deck_preview_stones = 'Stoned',
         },
         v_dictionary = {
             a_donl_discards_minus = '-#1# Discards',
