@@ -20,6 +20,8 @@ FONT = {
     'I': ['###', '.#.', '.#.', '.#.', '###'], 'M': ['#.#', '###', '###', '#.#', '#.#'],
     '?': ['##.', '..#', '.#.', '...', '.#.'], '$': ['.##', '##.', '.#.', '.##', '##.'],
     '@': ['.#.', '#.#', '###', '#..', '.##'], 'E': ['###', '#..', '##.', '#..', '###'],
+    'R': ['##.', '#.#', '##.', '#.#', '#.#'], 'C': ['.##', '#..', '#..', '#..', '.##'],
+    'T': ['###', '.#.', '.#.', '.#.', '.#.'], 'K': ['#.#', '#.#', '##.', '#.#', '#.#'],
 }
 
 
@@ -441,11 +443,31 @@ def vagabond(d):
 
 
 def burnt(d):
-    d.polygon([(35, 10), (48, 30), (44, 26), (50, 46), (20, 46), (26, 26), (22, 30)], fill=(250, 150, 40))  # flame
-    d.polygon([(35, 24), (42, 40), (28, 40)], fill=(255, 230, 120))
-    d.rounded_rectangle((18, 44, 52, 78), 6, fill=(60, 60, 72))               # pause button
-    d.rectangle((27, 52, 31, 70), fill=(250, 250, 250))
-    d.rectangle((39, 52, 43, 70), fill=(250, 250, 250))
+    """One-Take Donnie: clapperboard for take 1, with a red REC light."""
+    slate, slate_h, white = (44, 44, 54), (70, 70, 84), (246, 246, 246)
+    red = (230, 40, 40)
+    d.ellipse((18, 9, 23, 14), fill=red)                                      # REC light
+    d.point((19, 10), fill=(255, 160, 160))
+    txt(d, 'REC', 26, 10, red)
+    # open clapper stick (hinged at the left)
+    d.polygon([(17, 31), (52, 19), (54, 25), (19, 37)], fill=slate)
+    for i in range(5):
+        x = 22 + i * 7
+        y = 30 - i * 2.4
+        d.polygon([(x, y), (x + 4, y - 1.4), (x + 6, y + 4.6), (x + 2, y + 6)], fill=white)
+    d.ellipse((16, 34, 20, 38), fill=(170, 170, 184))                         # hinge
+    # fixed striped bar + slate
+    d.rectangle((17, 39, 55, 45), fill=slate)
+    for x in range(20, 55, 8):
+        d.polygon([(x, 39), (x + 4, 39), (x + 2, 45), (x - 2, 45)], fill=white)
+    d.rectangle((17, 46, 55, 80), fill=slate)
+    d.rectangle((17, 46, 55, 47), fill=slate_h)
+    d.line((20, 56, 52, 56), fill=(120, 120, 136))                            # chalk lines
+    d.line((36, 56, 36, 77), fill=(120, 120, 136))
+    txt(d, 'TAKE', 39, 50, white)
+    txt2(d, '1', 41, 61, white)                                               # take 1
+    for y in (51, 61, 66, 71):                                                    # scribbles
+        d.line((21, y, 32, y), fill=(200, 200, 210))
 
 
 def triboulet(d):

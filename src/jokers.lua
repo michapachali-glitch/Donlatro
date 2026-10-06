@@ -160,14 +160,19 @@ SMODS.Joker {
     end,
 }
 
--- Nolan: a Straight played in descending order (e.g. 6-5-4-3-2) raises his sell value by $5.
--- Once it reaches $20 (from $5): -1 Ante, then Nolan is destroyed.
-local function is_descending_run(cards)
+-- Nolan: plays with the direction of time. A Straight laid out in ascending order
+-- (e.g. 2-3-4-5-6) permanently adds +15 Chips, one in descending order (6-5-4-3-2) adds
+-- +3 Mult. Order is the left-to-right order of the played cards; Ace can be low at either end.
+local function is_run(cards, dir)
     if #cards < 2 then return false end
     for i = 2, #cards do
         local prev, cur = cards[i - 1]:get_id(), cards[i]:get_id()
-        local ace_low = cur == 14 and i == #cards and prev == 2 -- 5-4-3-2-A
-        if not (cur < prev or ace_low) then return false end
+        if dir > 0 then
+            if prev == 14 and i == 2 and cur == 2 then prev = 1 end -- A-2-3-4-5
+        elseif cur == 14 and i == #cards and prev == 2 then
+            cur = 1 -- 5-4-3-2-A
+        end
+        if (cur - prev) * dir <= 0 then return false end
     end
     return true
 end
@@ -177,28 +182,26 @@ SMODS.Joker {
     atlas = 'Jokers',
     pos = { x = 0, y = 1 },
     rarity = 2,
-    cost = 10, -- sells for $5
-    blueprint_compat = false,
-    eternal_compat = false,
-    config = { extra = { value = 5, gain = 5, limit = 20, ante = 1 } },
+    cost = 6,
+    blueprint_compat = true,
+    config = { extra = { chips = 0, mult = 0, chip_gain = 15, mult_gain = 3 } },
     loc_vars = function(self, info_queue, card)
         local stg = card.ability.extra
-        return { vars = { stg.gain, stg.limit, stg.ante, stg.value } }
+        return { vars = { stg.chip_gain or 15, stg.mult_gain or 3, stg.chips or 0, stg.mult or 0 } }
     end,
     calculate = function(self, card, context)
         local stg = card.ability.extra
-        if context.before and not context.blueprint and next(context.poker_hands['Straight'])
-            and is_descending_run(context.scoring_hand) then
-            stg.value = stg.value + stg.gain
-            card.ability.extra_value = (card.ability.extra_value or 0) + stg.gain
-            card:set_cost()
-            if stg.value >= stg.limit then
-                ease_ante(-stg.ante)
-                G.GAME.round_resets.blind_ante = (G.GAME.round_resets.blind_ante or G.GAME.round_resets.ante) - stg.ante
-                SMODS.destroy_cards(card)
-                return { message = localize { type = 'variable', key = 'a_donl_ante_minus', vars = { stg.ante } }, colour = G.C.FILTER }
+        if context.before and not context.blueprint and next(context.poker_hands['Straight']) then
+            if is_run(context.scoring_hand, 1) then
+                stg.chips = (stg.chips or 0) + (stg.chip_gain or 15)
+                return { message = localize('k_upgrade_ex'), colour = G.C.CHIPS }
+            elseif is_run(context.scoring_hand, -1) then
+                stg.mult = (stg.mult or 0) + (stg.mult_gain or 3)
+                return { message = localize('k_upgrade_ex'), colour = G.C.MULT }
             end
-            return { message = localize('k_val_up'), colour = G.C.MONEY }
+        end
+        if context.joker_main and ((stg.chips or 0) > 0 or (stg.mult or 0) > 0) then
+            return { chips = stg.chips, mult = stg.mult }
         end
     end,
 }
@@ -257,7 +260,10 @@ SMODS.Joker {
     blueprint_compat = true,
     config = { extra = { gain = 0.25 } },
     loc_vars = function(self, info_queue, card)
-        local used = G.GAME and G.GAME.current_round and G.GAME.current_round.discards_used or 0
+        -- outside a blind the counter still holds last round's discards, but the next round
+        -- starts from X1 again, so show that
+        local in_blind = G.GAME and G.GAME.blind and G.GAME.blind.in_blind
+        local used = in_blind and G.GAME.current_round.discards_used or 0
         return { vars = { card.ability.extra.gain, 1 + card.ability.extra.gain * used } }
     end,
     calculate = function(self, card, context)
@@ -270,8 +276,21 @@ SMODS.Joker {
     end,
 }
 
--- Classic Donnie: retriggers played cards whose rank was also played in the previous hand
--- this round (the hand history is tracked in src/tracking.lua).
+-- Classic Donnie: back to basics - starts at X1 Chips and permanently gains X0.05 Chips for
+-- every scored plain card (no enhancement, seal or edition).
+local function is_plain(c)
+    return c.config.center == G.P_CENTERS.c_base and not c.seal and not c.edition
+end
+
+-- copies saved before this rework have no `extra` table, or an old one without these fields
+local function classic_extra(card)
+    if type(card.ability.extra) ~= 'table' then card.ability.extra = {} end
+    local extra = card.ability.extra
+    extra.xchips = extra.xchips or 1
+    extra.gain = extra.gain or 0.05
+    return extra
+end
+
 SMODS.Joker {
     key = 'classic_donnie',
     atlas = 'Jokers',
@@ -279,11 +298,20 @@ SMODS.Joker {
     rarity = 3,
     cost = 8,
     blueprint_compat = true,
+    config = { extra = { xchips = 1, gain = 0.05 } },
+    loc_vars = function(self, info_queue, card)
+        local stg = classic_extra(card)
+        return { vars = { stg.gain, stg.xchips } }
+    end,
     calculate = function(self, card, context)
-        if context.repetition and context.cardarea == G.play then
-            if DONLATRO.previous_hand_ranks()[context.other_card:get_id()] then
-                return { repetitions = 1 }
-            end
+        local stg = classic_extra(card)
+        if context.individual and context.cardarea == G.play and not context.blueprint
+            and is_plain(context.other_card) then
+            stg.xchips = stg.xchips + stg.gain
+            return { message = localize('k_upgrade_ex'), colour = G.C.CHIPS, message_card = card }
+        end
+        if context.joker_main and stg.xchips > 1 then
+            return { xchips = stg.xchips }
         end
     end,
 }
@@ -441,8 +469,19 @@ SMODS.Joker {
     end,
 }
 
--- Buttplugs bei Butlers: played cards are retriggered once for every hand already
--- played this round (2nd hand: +1, 3rd hand: +2, ...).
+-- Buttplugs bei Butlers: every scored card is retriggered once per level of your weakest
+-- poker hand (the lowest level among all visible hands; secret hands count once unlocked).
+-- On a tie the lower-ranked hand is named, so a fresh run shows High Card, level 1.
+local function weakest_hand()
+    local name, level
+    for _, h in ipairs(G.handlist) do
+        if SMODS.is_poker_hand_visible(h) and (not level or G.GAME.hands[h].level <= level) then
+            name, level = h, G.GAME.hands[h].level
+        end
+    end
+    return name, math.max(0, level or 0)
+end
+
 SMODS.Joker {
     key = 'butlers',
     atlas = 'Jokers',
@@ -451,14 +490,15 @@ SMODS.Joker {
     cost = 6,
     blueprint_compat = true,
     loc_vars = function(self, info_queue, card)
-        local played = G.GAME and G.GAME.current_round and G.GAME.current_round.hands_played or 0
-        return { vars = { played } }
+        if not (G.GAME and G.GAME.hands and G.handlist) then return { vars = { 1, localize('High Card', 'poker_hands') } } end
+        local name, level = weakest_hand()
+        return { vars = { level, localize(name, 'poker_hands') } }
     end,
     calculate = function(self, card, context)
         if context.repetition and context.cardarea == G.play then
-            local n = G.GAME.current_round.hands_played
-            if n > 0 then
-                return { repetitions = n }
+            local _, level = weakest_hand()
+            if level > 0 then
+                return { repetitions = level }
             end
         end
     end,
@@ -489,6 +529,64 @@ SMODS.Joker {
             stg.off_round = G.GAME.round + 1
             SMODS.debuff_card(card, true, 'donl_thread')
             return { message = localize('k_donl_lost_thread'), colour = G.C.RED }
+        end
+    end,
+}
+
+-- Die Mods: every card in the first discard of each round is banned (permanently debuffed).
+-- Gains X0.04 Mult per card banned. Bans stay when the Mods are sold; a card that is
+-- already banned doesn't count again.
+--
+-- The ban is a sticker (card.ability.donl_banned): it draws a "BANNED" stamp on the card,
+-- adds a badge + tooltip, and survives enhancement changes (Tarots etc.), unlike a debuff
+-- source, which Steamodded clears whenever the card's center changes.
+SMODS.Sticker {
+    key = 'banned',
+    atlas = 'Stickers',
+    pos = { x = 1, y = 0 },
+    badge_colour = HEX('ce2228'),
+    rate = 0,
+    should_apply = false,
+    sets = { Default = true, Enhanced = true },
+    -- a flat ink stamp: skip the shiny 'voucher' pass vanilla stickers get
+    draw = function(self, card, layer)
+        G.shared_stickers[self.key].role.draw_major = card
+        G.shared_stickers[self.key]:draw_shader('dissolve', nil, nil, nil, card.children.center)
+    end,
+}
+
+-- Steamodded asks every mod's set_debuff whenever a card's debuff is recalculated.
+DONLATRO.set_debuff = function(card)
+    if card.ability and card.ability.donl_banned then
+        return true
+    end
+end
+
+SMODS.Joker {
+    key = 'mods',
+    atlas = 'Jokers',
+    pos = { x = 7, y = 2 },
+    rarity = 2,
+    cost = 6,
+    blueprint_compat = true,
+    config = { extra = { xmult = 1, gain = 0.04 } },
+    loc_vars = function(self, info_queue, card)
+        info_queue[#info_queue + 1] = { key = 'donl_banned', set = 'Other' }
+        return { vars = { card.ability.extra.gain, card.ability.extra.xmult } }
+    end,
+    calculate = function(self, card, context)
+        local stg = card.ability.extra
+        if context.discard and not context.blueprint and G.GAME.current_round.discards_used == 0 then
+            local c = context.other_card
+            if not c.ability.donl_banned then
+                SMODS.Stickers.donl_banned:apply(c, true)
+                SMODS.recalc_debuff(c)
+                stg.xmult = stg.xmult + stg.gain
+                return { message = localize('k_donl_banned'), colour = G.C.RED, message_card = c }
+            end
+        end
+        if context.joker_main and stg.xmult > 1 then
+            return { xmult = stg.xmult }
         end
     end,
 }

@@ -14,7 +14,7 @@ for _, file in ipairs(files) do
 end
 
 -- Everything from Donlatro is unlocked and discovered from the start (no collection "?").
-for _, objects in ipairs({ SMODS.Centers, SMODS.Blinds }) do
+for _, objects in ipairs({ SMODS.Centers, SMODS.Blinds, SMODS.Tags }) do
     for _, obj in pairs(objects) do
         if obj.mod == DONLATRO then
             obj.unlocked = true

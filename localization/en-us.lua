@@ -45,11 +45,12 @@ return {
             j_donl_don_appetito = {
                 name = 'Don Appetito',
                 text = {
-                    '{C:mult}+#1#{} Mult',
+                    'Starts with {C:mult}+#1#{} Mult',
                     'Gains {C:mult}+#2#{} Mult for every',
                     '{C:attention}Donlatro food{} Joker',
                     'that ran out this run',
                     '{C:inactive}No Mult while {C:attention}So(ß)e{C:inactive} is held',
+                    '{C:inactive}(Currently {C:mult}+#3#{C:inactive} Mult)',
                 },
             },
             j_donl_holyenergy = {
@@ -101,16 +102,20 @@ return {
                     'When {C:attention}sold{}, removes all',
                     '{C:attention}stickers{} from your',
                     'other Jokers',
+                    '{C:inactive}(Stickers: {C:attention}Eternal{C:inactive} - can\'t',
+                    '{C:inactive}be sold, {C:attention}Perishable{C:inactive} - debuffed',
+                    '{C:inactive}after 5 rounds, {C:attention}Rental{C:inactive} - costs',
+                    '{C:inactive}$3 per round)',
                 },
             },
             j_donl_nolan = {
                 name = 'Nolan',
                 text = {
-                    'Playing a {C:attention}Straight{} in',
-                    '{C:attention}descending{} order (e.g. 6-5-4-3-2)',
-                    'adds {C:money}$#1#{} sell value',
-                    'At {C:money}$#2#{}: {C:attention}-#3#{} Ante, then destroyed',
-                    '{C:inactive}(Currently {C:money}$#4#{C:inactive})',
+                    'Gains {C:chips}+#1#{} Chips when you play a',
+                    '{C:attention}Straight{} in {C:attention}ascending{} order (2-3-4-5-6)',
+                    'Gains {C:mult}+#2#{} Mult when you play a',
+                    '{C:attention}Straight{} in {C:attention}descending{} order (6-5-4-3-2)',
+                    '{C:inactive}(Currently {C:chips}+#3#{C:inactive} Chips, {C:mult}+#4#{C:inactive} Mult)',
                 },
             },
             j_donl_frustsuppe = {
@@ -145,7 +150,7 @@ return {
                 name = 'Jochen',
                 text = {
                     'Earn between {C:red}-$#1#{} and {C:money}$#2#{}',
-                    'at {C:attention}Cash Out{}',
+                    'at {C:attention}end of round{}',
                     '{C:inactive}(your Steuerberater decides)',
                 },
             },
@@ -161,15 +166,17 @@ return {
                 text = {
                     'Gains {X:mult,C:white} X#1# {} Mult for each',
                     '{C:attention}discard{} used this round',
+                    '{C:inactive}(Resets to {X:mult,C:white} X1 {C:inactive} every round)',
                     '{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)',
                 },
             },
             j_donl_classic_donnie = {
                 name = 'Classic Donnie',
                 text = {
-                    '{C:attention}Retrigger{} played cards whose',
-                    'rank was also played in your',
-                    '{C:attention}previous hand{} this round',
+                    'Gains {X:chips,C:white} X#1# {} Chips for every',
+                    'scored {C:attention}plain{} card',
+                    '{C:inactive}(no enhancement, seal or edition)',
+                    '{C:inactive}(Currently {X:chips,C:white} X#2# {C:inactive} Chips)',
                 },
             },
             j_donl_ihr_checkt = {
@@ -205,10 +212,9 @@ return {
                 name = 'Buttplugs bei Butlers',
                 text = {
                     'Every scored card is {C:attention}retriggered{}',
-                    'once for each hand already',
-                    'played this round',
-                    '{C:inactive}(e.g. 3rd hand: every card scores 3 times)',
-                    '{C:inactive}(Next hand: {C:attention}+#1#{C:inactive} retriggers)',
+                    'once per {C:attention}level{} of your',
+                    '{C:attention}lowest-level{} poker hand',
+                    '{C:inactive}(Currently {C:attention}#1#{C:inactive}x, weakest: {C:attention}#2#{C:inactive})',
                 },
             },
             j_donl_kaffee = {
@@ -229,6 +235,15 @@ return {
                     'for the following round',
                 },
             },
+            j_donl_mods = {
+                name = 'Die Mods',
+                text = {
+                    'All cards in the {C:attention}first discard{}',
+                    'of each round are {C:red}banned{}',
+                    'Gains {X:mult,C:white} X#1# {} Mult per banned card',
+                    '{C:inactive}(Currently {X:mult,C:white} X#2# {C:inactive} Mult)',
+                },
+            },
             -- renamed vanilla jokers (src/reskins.lua): only the name changes, text stays vanilla
             j_half = { name = 'Der kurze Gedanke' },
             j_mystic_summit = { name = 'Ohne Rampe, ohne mich' },
@@ -244,7 +259,15 @@ return {
             j_bloodstone = { name = 'Tübingen' },
             j_rough_gem = { name = 'Hamburg' },
             j_onyx_agate = { name = 'Irland' },
-            j_credit_card = { name = 'Erste Steuernachzahlung' },
+            j_credit_card = {
+                name = 'Nachträgliche Vorauszahlung',
+                text = {
+                    'Receive {C:money}$#1#{} when bought',
+                    '{C:red}Destroyed{} in {C:attention}#2#{} rounds',
+                    'and you {C:red}lose $#3#{}',
+                    '{C:inactive}(Sell value: {C:red}-$#3#{C:inactive})',
+                },
+            },
             j_delayed_grat = { name = '„Ich komme gleich dazu"' },
             j_business = { name = 'Die Werbeanfrage' },
             j_rocket = { name = 'Die Reichweite' },
@@ -271,7 +294,16 @@ return {
             j_cartomancer = { name = 'Die Astrologie' },
             j_astronomer = { name = 'Nolan Schmolan' },
             j_vagabond = { name = 'Die Pfandflaschen' },
-            j_burnt = { name = 'Die Pause-Taste' },
+            j_burnt = {
+                name = 'One-Take Donnie',
+                text = {
+                    'Beat a {C:attention}Small{} or {C:attention}Big Blind{}',
+                    'in {C:attention}1 hand{} without using',
+                    'a {C:red}discard{}: also get',
+                    "that blind's {C:attention}Skip Tag{}",
+                    '{C:inactive}(Boss Blinds give nothing)',
+                },
+            },
             j_space = { name = 'Die Rakete' },
             j_triboulet = { name = 'Costa und Jochen' },
             j_yorick = { name = '„Wo war ich?"' },
@@ -290,6 +322,16 @@ return {
                 },
             },
         },
+        Tag = {
+            tag_donl_umzug = {
+                name = 'Der Umzug',
+                text = {
+                    'In the next shop,',
+                    '{C:green}rerolling{} also rerolls',
+                    '{C:attention}Booster Packs{}',
+                },
+            },
+        },
         Other = {
             p_donl_donnie = {
                 name = 'Donnie Pack',
@@ -298,6 +340,13 @@ return {
                     '{C:attention}#2#{} Donlatro Jokers:',
                     '{C:green}Uncommon{}, {C:red}Rare{} or {C:legendary,E:1}Legendary{}',
                     '{C:inactive}(no Commons, no food)',
+                },
+            },
+            donl_banned = {
+                name = 'Banned',
+                text = {
+                    'Banned by {C:attention}Die Mods{}:',
+                    'permanently {C:red}debuffed{}',
                 },
             },
             donl_layers = {
@@ -524,6 +573,7 @@ return {
     misc = {
         labels = {
             donl_layers = 'Layered',
+            donl_banned = 'Banned',
         },
         dictionary = {
             k_donl_spilled = 'Spilled!',
@@ -534,6 +584,8 @@ return {
             k_donl_lost_thread = 'Lost the thread!',
             k_donl_charging = 'Charging!',
             k_donl_battery_empty = 'Akku leer!',
+            k_donl_banned = 'Banned!',
+            k_donl_one_take = 'One Take!',
             k_plus_stone = '+1 Stoned',
             ph_deck_preview_stones = 'Stoned',
         },

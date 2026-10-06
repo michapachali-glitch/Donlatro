@@ -78,7 +78,7 @@ SMODS.Joker {
     attributes = { 'food' },
     config = { extra = { mult = 10 } },
     loc_vars = function(self, info_queue, card)
-        return { vars = { appetito_mult(card), APPETITO_GAIN } }
+        return { vars = { card.ability.extra.mult or 10, APPETITO_GAIN, appetito_mult(card) } }
     end,
     calculate = function(self, card, context)
         if context.joker_main then
@@ -380,8 +380,14 @@ SMODS.Joker {
 
 -- 10) Kaffee: +1 discard once, for the next round played after buying it. At end of every
 -- round it costs $4; if you can't pay, it's gone.
+-- Removed from the game: never spawns and hidden from the collection; it stays registered
+-- so saves that own one still load.
 SMODS.Joker {
     key = 'kaffee',
+    no_collection = true,
+    in_pool = function(self, args)
+        return false
+    end,
     atlas = 'Jokers',
     pos = { x = 3, y = 2 },
     rarity = 1,

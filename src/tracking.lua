@@ -1,7 +1,8 @@
 -- Run-wide bookkeeping that has to happen whether or not a particular joker is held.
---   G.GAME.donl_prev_hand        ranks played in the previous hand this round (Classic Donnie)
+--   G.GAME.donl_prev_hand        ranks played in the previous hand this round (currently unused)
 --   G.GAME.donl_ante_snapshot    the deck at the start of the current Ante (Die Rückspultaste)
 --   G.GAME.donl_unsicher_until   round after which Zocker's debuff ends
+--   G.GAME.donl_umzug            Der Umzug tag is active in the current shop
 
 local function snapshot_deck()
     local saved = {}
@@ -43,6 +44,10 @@ DONLATRO.calculate = function(self, context)
         for _, j in ipairs(G.jokers.cards) do
             SMODS.debuff_card(j, false, 'donl_unsicher')
         end
+    end
+    -- Der Umzug (src/tags.lua): only lasts for one shop.
+    if context.ending_shop then
+        G.GAME.donl_umzug = nil
     end
     -- Donnie O'Sullivan: lift the "lost the thread" debuff after the round he sat out.
     if context.end_of_round and context.main_eval and not context.game_over then

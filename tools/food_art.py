@@ -122,20 +122,33 @@ def doener(d):
 
 
 def holy_energy(d):
-    can, can_s, can_h = (52, 168, 222), (30, 110, 170), (150, 220, 250)
-    metal, metal_s = (200, 206, 216), (140, 148, 164)
+    """Slim energy-drink can: tapered top and bottom, ring pull, "HOLY" label, bolt, halo."""
+    can, can_s, can_h = (60, 196, 120), (34, 136, 84), (170, 240, 200)
+    metal, metal_s, metal_h = (206, 210, 220), (140, 148, 164), (240, 242, 248)
     gold, gold_s = (255, 210, 64), (214, 150, 30)
-    d.ellipse((24, 8, 46, 15), outline=gold, width=2)                          # halo
-    d.rectangle((25, 25, 45, 81), fill=can)                                    # body
-    d.rectangle((41, 25, 45, 81), fill=can_s)
-    d.rectangle((27, 27, 28, 78), fill=can_h)
-    d.ellipse((25, 20, 45, 28), fill=metal)                                    # top
-    d.ellipse((28, 21, 42, 26), fill=metal_s)
-    d.rectangle((32, 22, 37, 24), fill=metal)                                  # pull tab
-    d.rectangle((25, 79, 45, 84), fill=metal_s)                                # bottom rim
-    d.polygon([(37, 36), (29, 55), (35, 55), (31, 72), (42, 49), (36, 49), (40, 36)], fill=gold)
-    d.line((37, 37, 30, 54), fill=(255, 245, 170))
-    d.line((40, 37, 36, 48), fill=gold_s)
+    dark = (30, 34, 44)
+    d.ellipse((25, 5, 45, 11), outline=gold, width=2)                          # halo
+    d.polygon([(28, 18), (42, 18), (46, 24), (24, 24)], fill=metal)             # tapered neck
+    d.polygon([(42, 18), (46, 24), (43, 24)], fill=metal_s)
+    d.ellipse((28, 15, 42, 20), fill=metal_s)                                  # lid
+    d.ellipse((30, 16, 40, 19), fill=metal)
+    d.ellipse((32, 15, 37, 18), outline=metal_h)                               # ring pull
+    d.rectangle((24, 24, 46, 78), fill=can)                                    # body
+    d.rectangle((42, 24, 46, 78), fill=can_s)
+    d.rectangle((26, 26, 27, 76), fill=can_h)
+    d.rectangle((24, 30, 46, 39), fill=dark)                                   # label band
+    x = 28
+    for ch in ('#.#', '#.#', '###', '#.#', '#.#'), ('###', '#.#', '#.#', '#.#', '###'),               ('#..', '#..', '#..', '#..', '###'), ('#.#', '#.#', '.#.', '.#.', '.#.'):
+        glyph(d, ch, x, 32, gold)                                              # H O L Y
+        x += 4
+    d.polygon([(38, 42), (29, 59), (35, 59), (31, 74), (43, 54), (37, 54), (41, 42)], fill=gold)
+    d.line((38, 43, 30, 58), fill=(255, 245, 170))
+    d.line((41, 43, 37, 53), fill=gold_s)
+    d.polygon([(24, 78), (46, 78), (43, 84), (27, 84)], fill=metal)            # tapered base
+    d.polygon([(43, 78), (46, 78), (43, 84), (41, 84)], fill=metal_s)
+    for x, y in ((29, 44), (44, 64), (27, 70), (45, 46)):                      # condensation
+        d.point((x, y), fill=(230, 255, 240))
+        d.point((x, y + 1), fill=(200, 245, 220))
 
 
 def maggi(d):
