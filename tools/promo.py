@@ -20,7 +20,7 @@ WHITE, GREY, LIGHT = (255, 255, 255), (150, 156, 170), (214, 220, 228)
 RARITY = {
     'Common': (0, 157, 255), 'Uncommon': (75, 194, 146), 'Rare': (254, 95, 85),
     'Legendary': (178, 108, 187), 'Boss': (230, 70, 70), 'Final Boss': (224, 40, 220),
-    'Voucher': (250, 180, 60), 'Tarot': (200, 160, 100), 'Spectral': (100, 140, 220), 'Deck': (150, 150, 170), 'Booster': (170, 90, 210), 'Enhancement': (90, 170, 220),
+    'Voucher': (250, 180, 60), 'Tarot': (200, 160, 100), 'Spectral': (100, 140, 220), 'Deck': (150, 150, 170), 'Booster': (170, 90, 210), 'Enhancement': (90, 170, 220), 'Tag': (90, 120, 200),
 }
 NEW_C, REPL_C, FOOD_C = (80, 200, 110), (120, 128, 146), (236, 146, 60)
 
@@ -171,6 +171,7 @@ CONSUMABLES = [
     (sprite('Packs.png', 0, 0), 'Donnie Pack', 'Booster', 'Choose 1 of 3 Donlatro Jokers: Uncommon, Rare or Legendary only.'),
     (sprite('Backs.png', 0, 0), 'Das ADHS-Deck', 'Deck', '+2 hand size, +1 discard. Jokers reshuffle every round.'),
     (sprite('Backs.png', 1, 0), 'Das Frustsuppen-Deck', 'Deck', 'Start at $0, no interest, +2 hands per round.'),
+    (sprite('Tags.png', 0, 0, w=34, h=34), 'Der Umzug', 'Tag', 'Skip Tag: in the next shop, rerolling also rerolls the Booster Packs.', 2),
 ]
 
 
@@ -319,20 +320,26 @@ if __name__ == '__main__':
     tw = d.textlength(title, font=F_TITLE)
     for off, col in ((8, (16, 18, 22)), (0, (254, 95, 85))):
         d.text(((PAGE_W - tw) / 2 + off * S, (30 + off) * S), title, font=F_TITLE, fill=col)
-    fan = [J(0, 0), J(3, 0), J(1, 1), J(4, 2, (5, 2)), J(6, 1), J(9, 1), J(1, 0)]
+    fan = [J(0, 0), J(3, 0), J(1, 1), J(4, 2, (5, 2)), J(7, 2), J(9, 1), J(1, 0)]
     card_fan(page, fan, PAGE_W / 2, 215 * S)
     d = ImageDraw.Draw(page)
     sub = 'A Balatro mod  -  everything new at a glance'
     shadow_text(d, ((PAGE_W - d.textlength(sub, font=F_SUB)) / 2, 680 * S), sub, F_SUB, WHITE, 3)
-    stats = (f'{len(NEW_JOKERS)} new Jokers  |  {len(REPLACEMENTS)} reworked Jokers  |  {len(BOSSES)} Bosses  |  '
-             f'{len(VOUCHERS)} Vouchers  |  2 Tarots  |  1 Enhancement  |  3 Spectrals  |  2 Decks  |  1 Pack')
+    kinds = {}
+    for it in CONSUMABLES:
+        kinds[it[2]] = kinds.get(it[2], 0) + 1
+    plural = lambda n, word: f'{n} {word}' + ('s' if n != 1 else '')
+    stats = '  |  '.join([f'{len(NEW_JOKERS)} new Jokers', f'{len(REPLACEMENTS)} reworked Jokers', plural(len(BOSSES), 'Boss').replace('Bosss', 'Bosses'),
+                          plural(len(VOUCHERS), 'Voucher'), plural(kinds['Tarot'], 'Tarot'), plural(kinds['Enhancement'], 'Enhancement'),
+                          plural(kinds['Spectral'], 'Spectral'), plural(kinds['Deck'], 'Deck'), plural(kinds['Booster'], 'Pack'),
+                          plural(kinds['Tag'], 'Tag')])
     shadow_text(d, ((PAGE_W - d.textlength(stats, font=F_BODY)) / 2, 740 * S), stats, F_BODY, LIGHT)
     lx = (PAGE_W - 900 * S) / 2                                              # legend
     lx = badge(d, lx, 790 * S, 'NEW', NEW_C)
     d.text((lx, 791 * S), 'brand-new creation', font=F_BODY, fill=LIGHT)
     lx += 260 * S
     lx = badge(d, lx, 790 * S, 'REPLACES ...', REPL_C)
-    d.text((lx, 791 * S), 'vanilla Joker, renamed + redrawn', font=F_BODY, fill=LIGHT)
+    d.text((lx, 791 * S), 'vanilla Joker, renamed + redrawn', font=F_BODY, fill=LIGHT)  # some with a new effect
     lx += 400 * S
     lx = badge(d, lx, 790 * S, 'FOOD', FOOD_C)
     d.text((lx, 791 * S), 'runs out', font=F_BODY, fill=LIGHT)
@@ -348,7 +355,7 @@ if __name__ == '__main__':
         img = sprite('Jokers.png', 0, 2) if idx is None else R(idx, idx + 4 if idx >= 41 else None)
         tile(p, x, yy, img, S, name, rarity, [('REPLACES ' + vanilla.upper(), REPL_C)], effect)
 
-    y = section(page, y, 'REWORKED JOKERS', 'vanilla effects with a Donlatro name and new art', REPL_C)
+    y = section(page, y, 'REWORKED JOKERS', 'vanilla Jokers with a Donlatro name, new art and some with a new effect', REPL_C)
     y = grid(page, y, REPLACEMENTS, repl)
 
     y = section(page, y, 'BOSS BLINDS', 'new opponents', RARITY['Boss'])
@@ -357,8 +364,9 @@ if __name__ == '__main__':
     y = section(page, y, 'VOUCHERS', 'base voucher and its upgrade', RARITY['Voucher'])
     y = grid(page, y, VOUCHERS, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], 'Voucher', [('VOUCHER', RARITY['Voucher'])], it[2]))
 
-    y = section(page, y, 'TAROTS, SPECTRALS, ENHANCEMENTS, DECKS & PACKS', 'more ways to break the run', RARITY['Spectral'])
-    y = grid(page, y, CONSUMABLES, lambda p, x, yy, it: tile(p, x, yy, it[0], S, it[1], it[2], [(it[2].upper(), RARITY[it[2]])], it[3]))
+    y = section(page, y, 'TAROTS, SPECTRALS, ENHANCEMENTS, DECKS, PACKS & TAGS', 'more ways to break the run', RARITY['Spectral'])
+    y = grid(page, y, CONSUMABLES, lambda p, x, yy, it: tile(p, x, yy, it[0], (it[4] if len(it) > 4 else 1) * S, it[1], it[2],
+                                                            [(it[2].upper(), RARITY[it[2]])], it[3]))
 
     out = os.path.join(ROOT, 'promo')
     os.makedirs(out, exist_ok=True)
